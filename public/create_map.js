@@ -1,20 +1,5 @@
 var map;
 
-function haversine(lat1, lon1, lat2, lon2) {
-    const toRadian = Math.PI / 180;
-    const radius = 3958.8;
-
-    lat1 = lat1 * toRadian;
-    lon1 = lon1 * toRadian;
-    lat2 = lat2 * toRadian;
-    lon2 = lon2 * toRadian;
-
-    const innerFormula = Math.sin((lat2 - lat1) / 2) ** 2 +
-                         Math.cos(lat1) * Math.cos(lat2) *
-                         Math.sin((lon2 - lon1) / 2) ** 2;
-
-    return 2 * radius * Math.asin(Math.sqrt(innerFormula));
-}
 
 var locData = {
     locations: [
@@ -162,7 +147,8 @@ var locData = {
         ],
         'WashingtonDC': [
             { city: 'Philadelphia', distance: 140 },
-            { city: 'Raleigh', distance: 140 }
+            { city: 'Raleigh', distance: 140 },
+            { city: 'Columbus', distance: 410 }
         ],
         'Seattle': [
             { city: 'Portland', distance: 174 },
@@ -170,17 +156,22 @@ var locData = {
             { city: 'Boise', distance: 496 }
         ],
         'Boise': [
-            { city: 'Helena', distance: 346 }
+            { city: 'Helena', distance: 346 },
+            { city: 'SaltLakeCity', distance: 344 },
+            { city: 'Seattle', distance: 496 }
         ],
         'SaltLakeCity': [
-            { city: 'Boise', distance: 344 }
+            { city: 'Boise', distance: 344 },
+            { city: 'Denver', distance: 520 }
         ],
         'Spokane': [
-            { city: 'Helena', distance: 333 }
+            { city: 'Helena', distance: 333 },
+            { city: 'Seattle', distance: 280 }
         ],
         'Billings': [
             { city: 'Denver', distance: 554 },
-            { city: 'Helena', distance: 240 }
+            { city: 'Helena', distance: 240 },
+            { city: 'Minneapolis', distance: 824 }
         ],
         'Jacksonville': [
             { city: 'Charlotte', distance: 370 },
@@ -196,11 +187,13 @@ var locData = {
         'Atlanta': [
             { city: 'Charlotte', distance: 244 },
             { city: 'Jacksonville', distance: 346 },
-            { city: 'NewOrleans', distance: 470 }
+            { city: 'NewOrleans', distance: 470 },
+            { city: 'Memphis', distance: 384 }
         ],
         'Nashville': [
             { city: 'Memphis', distance: 210 },
-            { city: 'Louisville', distance: 175 }
+            { city: 'Louisville', distance: 175 },
+            { city: 'Charlotte', distance: 410 }
         ],
         'Memphis': [
             { city: 'Nashville', distance: 210 },
@@ -214,7 +207,8 @@ var locData = {
         ],
         'SanFrancisco': [
             { city: 'SanJose', distance: 48 },
-            { city: 'Sacramento', distance: 87 }
+            { city: 'Sacramento', distance: 87 },
+            { city: 'Portland', distance: 634 }
         ],
         'Fresno': [
             { city: 'SanJose', distance: 152 },
@@ -229,7 +223,8 @@ var locData = {
         'LasVegas': [
             { city: 'LosAngeles', distance: 270 },
             { city: 'Phoenix', distance: 297 },
-            { city: 'SaltLakeCity', distance: 421 }
+            { city: 'SaltLakeCity', distance: 421 },
+            { city: 'Sacramento', distance: 562 }
         ],
         'KansasCity': [
             { city: 'Denver', distance: 605 },
@@ -241,12 +236,14 @@ var locData = {
         ],
         'Wichita': [
             { city: 'Albuquerque', distance: 543 },
-            { city: 'Tulsa', distance: 180 }
+            { city: 'Tulsa', distance: 180 },
+            { city: 'KansasCity', distance: 198 }
         ],
         'Tulsa': [
             { city: 'Dallas', distance: 240 },
             { city: 'Memphis', distance: 390 },
-            { city: 'NewOrleans', distance: 635 }
+            { city: 'NewOrleans', distance: 635 },
+            { city: 'Wichita', distance: 180 }
         ],
         'Omaha': [
             { city: 'Chicago', distance: 470 },
@@ -255,13 +252,16 @@ var locData = {
         ],
         'Minneapolis': [
             { city: 'Milwaukee', distance: 337 },
-            { city: 'Billings', distance: 824 }
+            { city: 'Billings', distance: 824 },
+            { city: 'Omaha', distance: 382 }
         ],
         'NewOrleans': [
             { city: 'Atlanta', distance: 470 },
-            { city: 'Houston', distance: 348 }
+            { city: 'Houston', distance: 348 },
+            { city: 'Memphis', distance: 395 }
         ]
     }
+
 };
 
 
@@ -306,6 +306,7 @@ function initMap() {
 
         });
 
+    /*
     polylines = [];
 
     Object.keys(locData.adjacencies).forEach(function(city) {
@@ -348,7 +349,7 @@ function initMap() {
     });
 
     window.initMap = initMap
-    
+    */
 })};
 
 initMap();
