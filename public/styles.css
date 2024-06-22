@@ -30,10 +30,10 @@ body{
 
 #map {
     height: 900px;
-    width: 100%;
+    width: 70%;
     top: 0;
     padding: 0%;
     margin-top: -1%;
-    margin-left: 1%;
+    margin-left: auto;
     z-index: 1;
 }
