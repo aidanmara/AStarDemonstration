@@ -306,8 +306,6 @@ function initMap() {
 
         });
 
-    /*
-    polylines = [];
 
     Object.keys(locData.adjacencies).forEach(function(city) {
         var cityLocation = locData.locations.find(loc => loc.name === city);
@@ -319,7 +317,7 @@ function initMap() {
     
         var adjacentCities = locData.adjacencies[city];
         adjacentCities.forEach(function(adjacentCity) {
-            var adjacentCityLocation = locData.locations.find(loc => loc.name === adjacentCity.city);
+            var adjacentCityLocation = locData.locations.find(loc => loc.name === adjacentCity.name);
             if (!adjacentCityLocation) {
                 console.error("Adjacent city location not found:", adjacentCity);
                 return; // Skip processing this adjacent city
@@ -339,18 +337,11 @@ function initMap() {
                 strokeWeight: 2,
             });
     
-            polylines.push(path)
+            path.setMap(map);
         });
 
     });
-
-    polylines.forEach(function(polyline) {
-        polyline.setMap(map);
-    });
-
-    window.initMap = initMap
-    */
 })};
 
-initMap();
+//initMap();
 

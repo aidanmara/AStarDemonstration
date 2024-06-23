@@ -1,3 +1,95 @@
+class PriorityQueue {
+    constructor() {
+      this.heap = [];
+    }
+  
+    // Method to swap elements in the heap
+    swap(i, j) {
+      [this.heap[i], this.heap[j]] = [this.heap[j], this.heap[i]];
+    }
+
+    extractMin() {
+        const min = this.heap[0];
+        const end = this.heap.pop();
+        if (this.heap.length > 0) {
+            this.heap[0] = end;
+            this.sinkDown(0);
+        }
+        return min;
+    }
+  
+    // Method to bubble up an element to its correct position
+    bubbleUp() {
+        let index = this.heap.length - 1;
+        while (index > 0) {
+          let parentIndex = Math.floor((index - 1) / 2);
+          if (this.heap[parentIndex].priority <= this.heap[index].priority) break;
+          this.swap(parentIndex, index);
+          index = parentIndex;
+        }
+      }
+      
+      sinkDown(index) {
+          const length = this.heap.length;
+          const element = this.heap[index];
+          while (true) {
+              const leftChildIndex = 2 * index + 1;
+              const rightChildIndex = 2 * index + 2;
+              let leftChild, rightChild;
+              let swap = null;
+      
+              if (leftChildIndex < length) {
+                  leftChild = this.heap[leftChildIndex];
+                  if (leftChild.priority < element.priority) {
+                      swap = leftChildIndex;
+                  }
+              }
+      
+              if (rightChildIndex < length) {
+                  rightChild = this.heap[rightChildIndex];
+                  if (
+                      (swap === null && rightChild.priority < element.priority) ||
+                      (swap !== null && rightChild.priority < leftChild.priority)
+                  ) {
+                      swap = rightChildIndex;
+                  }
+              }
+      
+              if (swap === null) break;
+              this.heap[index] = this.heap[swap];
+              index = swap;
+          }
+          this.heap[index] = element;
+      }
+    // Method to insert an element with a given priority
+    enqueue(element, priority) {
+      this.heap.push({ element, priority });
+      this.bubbleUp();
+    }
+  
+    // Method to remove and return the element with the highest priority
+    dequeue() {
+      if (this.heap.length === 0) return null;
+      if (this.heap.length === 1) return this.heap.pop().element;
+  
+      const root = this.heap[0].element;
+      this.heap[0] = this.heap.pop();
+      this.sinkDown(0);
+      return root;
+    }
+  
+    // Method to check if the priority queue is empty
+    isEmpty() {
+      return this.heap.length === 0;
+    }
+  
+    // Method to get the size of the priority queue
+    size() {
+      return this.heap.length;
+    }
+  }
+
+
 var locData = {
     locations: [
         { name: 'NewYork', lat: 40.712776, lng: -74.005974 },
@@ -31,7 +123,7 @@ var locData = {
         { name: 'Fresno', lat: 36.737798, lng: -119.787125 },
         { name: 'Sacramento', lat: 38.581572, lng: -121.494400 },
         { name: 'Atlanta', lat: 33.748995, lng: -84.387982 },
-        { name: 'Kansasname', lat: 39.099727, lng: -94.578567 },
+        { name: 'KansasCity', lat: 39.099727, lng: -94.578567 },
         { name: 'Miami', lat: 25.761680, lng: -80.191790 },
         { name: 'Raleigh', lat: 35.779590, lng: -78.638179 },
         { name: 'Omaha', lat: 41.256538, lng: -95.934502 },
@@ -40,22 +132,21 @@ var locData = {
         { name: 'Wichita', lat: 37.687176, lng: -97.330053 },
         { name: 'NewOrleans', lat: 29.951065, lng: -90.071533 },
         { name: 'Cleveland', lat: 41.499320, lng: -81.694360 },
-        { name: 'Bakersfield', lat: 35.373292, lng: -119.018713 },
         { name: 'Boise', lat: 43.615021, lng: -116.202316 },
         { name: 'Spokane', lat: 47.658779, lng: -117.426048 },
-        { name: 'SaltLakename', lat: 40.760780, lng: -111.891045 },
+        { name: 'SaltLakeCity', lat: 40.760780, lng: -111.891045 },
         { name: 'Helena', lat: 46.589145, lng: -112.039105 },
         { name: 'Billings', lat: 45.783285, lng: -108.500690 },
 
     ],
     adjacencies: {
         'NewYork': [
-            { name: 'Philadelphia', distance: 94 },
+            { name: 'Philadelphia', distance: 97.2 },
             { name: 'Boston', distance: 215 },
             { name: 'Cleveland', distance: 460 }
         ],
         'Philadelphia': [
-            { name: 'NewYork', distance: 94 },
+            { name: 'NewYork', distance: 97.2 },
             { name: 'WashingtonDC', distance: 140 }
         ],
         'Boston': [
@@ -70,6 +161,7 @@ var locData = {
             { name: 'SanDiego', distance: 120 },
             { name: 'SanJose', distance: 340 },
             { name: 'LasVegas', distance: 270 },
+            { name: 'Fresno', distance: 221 },
             { name: 'Phoenix', distance: 373 }
         ],
         'SanDiego': [
@@ -86,15 +178,25 @@ var locData = {
             { name: 'Indianapolis', distance: 185 },
             { name: 'Columbus', distance: 355 },
             { name: 'Milwaukee', distance: 92 },
-            { name: 'Detroit', distance: 282 }
+            { name: 'Detroit', distance: 282 },
+            { name: 'Omaha', distance: 470 },
         ],
         'Indianapolis': [
             { name: 'Chicago', distance: 185 },
             { name: 'Columbus', distance: 176 },
             { name: 'Louisville', distance: 115 }
         ],
+        'Louisville': [
+            { name: 'Indianapolis', distance: 115 },
+            { name: 'KansasCity', distance: 508 },
+            { name: 'Nashville', distance: 175 },
+        ],
         'Milwaukee': [
-            { name: 'Chicago', distance: 92 }
+            { name: 'Chicago', distance: 92 },
+            { name: 'Minneapolis', distance: 337 },
+        ],
+        'Miami': [
+            { name: 'Jacksonville', distance: 347 }
         ],
         'Detroit': [
             { name: 'Chicago', distance: 282 },
@@ -120,12 +222,15 @@ var locData = {
         ],
         'Dallas': [
             { name: 'Houston', distance: 239 },
-            { name: 'SanAntonio', distance: 274 }
+            { name: 'SanAntonio', distance: 274 },
+            { name: 'Tulsa', distance: 240 },
         ],
         'Phoenix': [
             { name: 'SanDiego', distance: 355 },
             { name: 'LasVegas', distance: 297 },
-            { name: 'Albuquerque', distance: 419 }
+            { name: 'Albuquerque', distance: 419 },
+            { name: 'LosAngeles', distance: 373 },
+            {name: 'ElPaso', distance: 430 },
         ],
         'ElPaso': [
             { name: 'SanAntonio', distance: 552 },
@@ -135,16 +240,20 @@ var locData = {
         'Albuquerque': [
             { name: 'Phoenix', distance: 419 },
             { name: 'ElPaso', distance: 266 },
-            { name: 'Denver', distance: 449 }
+            { name: 'Denver', distance: 449 },
+            { name : 'Wichita', distance: 595.5}
         ],
         'Denver': [
-            { name: 'Kansasname', distance: 605 },
-            { name: 'SaltLakename', distance: 520 },
-            { name: 'Boise', distance: 836 }
+            { name: 'KansasCity', distance: 605 },
+            { name: 'SaltLakeCity', distance: 520 },
+            { name: 'Albuquerque', distance: 449 },
+            { name: 'Omaha', distance: 540 },
+            { name: 'Boise', distance: 836 },
+            { name: 'Billings', distance: 554 },
         ],
         'WashingtonDC': [
             { name: 'Philadelphia', distance: 140 },
-            { name: 'Raleigh', distance: 140 },
+            { name: 'Raleigh', distance: 278 },
             { name: 'Columbus', distance: 410 }
         ],
         'Seattle': [
@@ -154,11 +263,14 @@ var locData = {
         ],
         'Boise': [
             { name: 'Helena', distance: 346 },
-            { name: 'SaltLakename', distance: 344 },
-            { name: 'Seattle', distance: 496 }
+            { name: 'SaltLakeCity', distance: 344 },
+            { name: 'Seattle', distance: 496 },
+            { name: 'Denver', distance: 836 },
+            { name: 'Portland', distance: 430 },
         ],
-        'SaltLakename': [
+        'SaltLakeCity': [
             { name: 'Boise', distance: 344 },
+            { name: 'LasVegas', distance: 421 },
             { name: 'Denver', distance: 520 }
         ],
         'Spokane': [
@@ -181,6 +293,10 @@ var locData = {
             { name: 'Raleigh', distance: 130 },
             { name: 'Nashville', distance: 410 }
         ],
+        'Raleigh': [
+            { name: 'WashingtonDC', distance: 278 },
+            { name: 'Charlotte', distance: 130 },
+        ],
         'Atlanta': [
             { name: 'Charlotte', distance: 244 },
             { name: 'Jacksonville', distance: 346 },
@@ -190,12 +306,14 @@ var locData = {
         'Nashville': [
             { name: 'Memphis', distance: 210 },
             { name: 'Louisville', distance: 175 },
+            { name: 'KansasCity', distance: 553 },
             { name: 'Charlotte', distance: 410 }
         ],
         'Memphis': [
             { name: 'Nashville', distance: 210 },
             { name: 'NewOrleans', distance: 395 },
-            { name: 'Atlanta', distance: 384 }
+            { name: 'Atlanta', distance: 384 },
+            { name: 'Tulsa', distance: 390 },
         ],
         'Portland': [
             { name: 'Seattle', distance: 174 },
@@ -209,7 +327,8 @@ var locData = {
         ],
         'Fresno': [
             { name: 'SanJose', distance: 152 },
-            { name: 'LosAngeles', distance: 221 }
+            { name: 'LosAngeles', distance: 221 },
+            { name: 'Sacramento', distance: 172 },
         ],
         'Sacramento': [
             { name: 'SanFrancisco', distance: 87 },
@@ -220,10 +339,10 @@ var locData = {
         'LasVegas': [
             { name: 'LosAngeles', distance: 270 },
             { name: 'Phoenix', distance: 297 },
-            { name: 'SaltLakename', distance: 421 },
+            { name: 'SaltLakeCity', distance: 421 },
             { name: 'Sacramento', distance: 562 }
         ],
-        'Kansasname': [
+        'KansasCity': [
             { name: 'Denver', distance: 605 },
             { name: 'Wichita', distance: 198 },
             { name: 'Tulsa', distance: 275 },
@@ -232,19 +351,22 @@ var locData = {
             { name: 'Omaha', distance: 185 }
         ],
         'Wichita': [
-            { name: 'Albuquerque', distance: 543 },
+            { name : 'Wichita', distance: 595.5},
             { name: 'Tulsa', distance: 180 },
-            { name: 'Kansasname', distance: 198 }
+            { name: 'KansasCity', distance: 198 },
+            { name : 'Albuquerque', distance: 595.5}
         ],
         'Tulsa': [
             { name: 'Dallas', distance: 240 },
             { name: 'Memphis', distance: 390 },
             { name: 'NewOrleans', distance: 635 },
+            { name: 'KansasCity', distance: 275 },
             { name: 'Wichita', distance: 180 }
         ],
         'Omaha': [
             { name: 'Chicago', distance: 470 },
             { name: 'Minneapolis', distance: 382 },
+            { name: 'KansasCity', distance: 185 },
             { name: 'Denver', distance: 540 }
         ],
         'Minneapolis': [
@@ -255,7 +377,13 @@ var locData = {
         'NewOrleans': [
             { name: 'Atlanta', distance: 470 },
             { name: 'Houston', distance: 348 },
-            { name: 'Memphis', distance: 395 }
+            { name: 'Memphis', distance: 395 },
+            { name: 'Tulsa', distance: 635 },
+        ],
+        'Helena': [
+            { name: 'Billings', distance: 240 },
+            { name: 'Spokane', distance: 333 },
+            { name: 'Boise', distance: 346 }
         ]
     }
 
@@ -282,14 +410,13 @@ function haversine(lat1, lon1, lat2, lon2) {
   };
   
 
-function calculate_estimated_distances(endname){
-    let heuristicArray = new Array();
+function calculate_estimated_distances(current, endname){
+    let heuristicScore = Infinity;
     //calculate the heuristic function for each name 
-    locData.locations.forEach(name => {
-        heuristicArray.push({name: name.name, hVal: haversine(name.lat, name.lng, endname.lat, endname.lng)});
-    });
 
-    return heuristicArray;
+    heuristicScore = haversine(current.lat, current.lng, endname.lat, endname.lng);
+
+    return heuristicScore;
 }
 
 
@@ -336,12 +463,7 @@ async function build_iteration(startname, speed) {
 
     setTimeout(() => {
     
-
     var bestPath = currentpaths[0];
-
-    currentpaths.forEach(path => {
-        path.setMap(null);
-    });
 
     setTimeout(() => {
         bestPath.setMap(map);
@@ -352,8 +474,8 @@ async function build_iteration(startname, speed) {
 }
 
 
-function a_star(startname, endname){
- fetch('map_styling.json')
+function build_map(){
+    fetch('map_styling.json')
     .then(response => response.json())
     .then(data => {
         var mapOptions = {
@@ -362,6 +484,7 @@ function a_star(startname, endname){
             styles: data,
             disableDefaultUI: true,
         };
+
         map = new google.maps.Map(document.getElementById('map'), mapOptions);
         
     
@@ -391,12 +514,269 @@ function a_star(startname, endname){
 
         });
 
+        Object.keys(locData.adjacencies).forEach(function(city) {
+            var cityLocation = locData.locations.find(loc => loc.name === city);
+        
+            if (!cityLocation) {
+                console.error("City location not found:", city);
+                return; // Skip processing this city
+            }
+        
+            var adjacentCities = locData.adjacencies[city];
+            adjacentCities.forEach(function(adjacentCity) {
+                var adjacentCityLocation = locData.locations.find(loc => loc.name === adjacentCity.name);
+                if (!adjacentCityLocation) {
+                    console.error("Adjacent city location not found:", adjacentCity);
+                    return; // Skip processing this adjacent city
+                }
+        
+                var pathCoordinates = [
+                    { lat: cityLocation.lat, lng: cityLocation.lng },
+                    { lat: adjacentCityLocation.lat, lng: adjacentCityLocation.lng }
+                ];
     
-        build_iteration(startname, 1)
-
-
+    
+                var path = new google.maps.Polyline({
+                    path: pathCoordinates,
+                    geodesic: true,
+                    strokeColor: "#000000",
+                    strokeOpacity: 1.0,
+                    strokeWeight: 2,
+                });
+        
+                path.setMap(map);
+            });
+    
+        });
+        return map
 });
 }
 
+var eventHandle = new Array();
+var activePath = new Array();
+var bestpath = new Map();
 
-a_star({ name: 'LosAngeles', lat: 34.052235, lng: -118.243683 },{ name: 'NewYork', lat: 40.712776, lng: -74.005974 });
+function a_star(startname, endname){
+    
+        startname = locData.locations.find(loc => loc.name === startname);        
+        endname = locData.locations.find(loc => loc.name === endname);
+
+        let openQueue = new PriorityQueue();
+        console.log(openQueue);
+        let visitedSet = new Set();
+        let cameFrom = new Map();
+
+        let gScore = new Map();
+        locData.locations.forEach(node => gScore.set(node.name, Infinity));
+        gScore.set(startname.name, 0);
+
+        let fScore = new Map();
+        locData.locations.forEach(node => fScore.set(node.name, Infinity));
+        fScore.set(startname.name, calculate_estimated_distances(startname, endname));
+
+        openQueue.enqueue(startname.name, fScore.get(startname.name));
+
+        while (!openQueue.isEmpty()) {
+                let iterationData = new Object();
+                let prediscoverPath = [];
+                let current = openQueue.extractMin().element;
+                visitedSet.add(current);
+
+
+
+                if (current != startname.name){    
+                    
+                    let currentCoords = locData.locations.find(loc => loc.name === current);
+                    let lastCoords = locData.locations.find(loc => loc.name === cameFrom.get(current));
+
+                    let pathCoords = [
+                        {lat: currentCoords.lat, lng: currentCoords.lng},
+                        {lat: lastCoords.lat, lng: lastCoords.lng},
+                    ]
+
+                    let explore = new google.maps.Polyline({
+                        path: pathCoords,
+                        geodesic: true,
+                        strokeColor: "#D3D8C4",
+                        strokeOpacity: 1.0,
+                        strokeWeight: 3,
+                        zIndex: 50
+                    });
+            
+                    prediscoverPath.push(explore);
+                }
+
+
+            if (current === endname.name) {
+                let currentCoords = locData.locations.find(loc => loc.name === current);
+                let lastCoords = locData.locations.find(loc => loc.name === endname.name);
+
+                let pathCoords = [
+                    {lat: currentCoords.lat, lng: currentCoords.lng},
+                    {lat: lastCoords.lat, lng: lastCoords.lng},
+                ]
+
+                let explore = new google.maps.Polyline({
+                    path: pathCoords,
+                    geodesic: true,
+                    strokeColor: "#D3D8C4",
+                    strokeOpacity: 1.0,
+                    strokeWeight: 3,
+                    zIndex: 50
+                });
+        
+                prediscoverPath.push(explore);
+                iterationData['edges'] = prediscoverPath;
+                eventHandle.push(iterationData);
+
+
+
+                console.log(reconstruct_path(cameFrom, current));
+
+                bestpath = reconstruct_path(cameFrom, current);
+
+                return reconstruct_path(cameFrom, current);
+            }
+
+            var neighbors = locData.adjacencies[current];
+            console.log(current);
+
+            neighbors.forEach(neighbor => {
+                let gScoreTemp = gScore.get(current) + neighbor.distance;
+    
+                if (gScoreTemp < gScore.get(neighbor.name)) {
+                    cameFrom.set(neighbor.name, current);
+                    gScore.set(neighbor.name, gScoreTemp);
+
+                    let neighborCoords = locData.locations.find(loc => loc.name === neighbor.name);
+                    fScore.set(neighbor.name, gScoreTemp + calculate_estimated_distances(neighborCoords, endname));
+    
+                    if (!visitedSet.has(neighbor.name)) {
+                        openQueue.enqueue(neighbor.name, fScore.get(neighbor.name));
+                    }
+
+
+                    
+                }
+                
+               
+            });
+            iterationData['edges'] = prediscoverPath;
+            eventHandle.push(iterationData);
+        }
+
+        //build_iteration(startname, 1);
+
+        return null; // Failure, no path found
+}
+
+
+
+
+function reconstruct_path(cameFrom, current) {
+    let totalPath = [current];
+    while (cameFrom.has(current)) {
+        current = cameFrom.get(current);
+        totalPath.unshift(current);
+    }
+    return totalPath;
+}
+
+
+function check_heuristics(){ 
+    let nonAdmis = [];
+    locData.locations.forEach(location => {
+        locData.adjacencies[location.name].forEach( adjacentCity => {
+            let neighborCoords = locData.locations.find(loc => loc.name === adjacentCity.name);
+            if (adjacentCity.distance <= calculate_estimated_distances(location, neighborCoords)){
+            nonAdmis.push({neighbor: adjacentCity.name, n: location.name});
+            }
+        })
+    })
+
+
+    console.log(nonAdmis);
+}
+
+function check_symmetry(){ 
+    let nonAdmis = [];
+    locData.locations.forEach(location => {
+        locData.adjacencies[location.name].forEach( adjacentCity => {
+
+            let city = locData.adjacencies[adjacentCity.name].find(loc => loc.name === location.name);
+
+            if (city == null){
+            nonAdmis.push({neighbor: adjacentCity.name, n: location.name});
+            }
+        })
+    })
+
+
+    console.log(nonAdmis);
+}
+
+function show_events(speed){
+    let index = 0;
+
+    function processs_next_event() {
+        if (index < eventHandle.length) {
+            eventHandle[index]['edges'].forEach( edge => {
+                edge.setMap(map);
+                activePath.push(edge);
+            });
+            index++;
+            setTimeout(processs_next_event, speed*1000); // Set timeout for 1 second (1000 milliseconds)
+        }
+    }
+
+    processs_next_event();
+}
+
+
+function display_path(){
+
+    function delete_temp_path(){
+        activePath.forEach( edge => {
+            edge.setMap(null);
+        })
+        setTimeout(draw_best_path, 100);
+    }
+
+    function draw_best_path(){
+        let index = 0;
+
+        while(index < bestpath.length-1){
+            let currentCoords = locData.locations.find(loc => loc.name === bestpath[index]);
+            let lastCoords = locData.locations.find(loc => loc.name === bestpath[index+1]);
+
+            console.log(currentCoords)
+        
+            let pathCoords = [
+                {lat: currentCoords.lat, lng: currentCoords.lng},
+                {lat: lastCoords.lat, lng: lastCoords.lng},
+            ];
+        
+            let explore = new google.maps.Polyline({
+                path: pathCoords,
+                geodesic: true,
+                strokeColor: "#00FF00",
+                strokeOpacity: 1.0,
+                strokeWeight: 4,
+                zIndex: 51
+            });
+        
+            explore.setMap(map);
+            index++;
+        }
+           
+    }
+
+    delete_temp_path();
+
+    
+
+}
+
+
+build_map();
+check_heuristics();
