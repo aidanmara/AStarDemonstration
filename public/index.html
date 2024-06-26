@@ -11,12 +11,36 @@
 </head>
 <body>
     <div id="gui">
-        <button onclick="console.log(a_star('Seattle', 'Miami'));">ASTAR</button>
+
+        
+
         <button onclick="show_events(.1)">EVENTS</button>
         <button onclick="display_path()">SHOW</button>
-        
+
+        </div>
+
+
+    <div id="bottom-bar">
+
+        <div class="to-box">
+            <h2>Starting City</h2>
+            <div class="dropdown">
+                <input type="text" class="dropbtn" id="searchInput-start" onkeyup="filterFunction()" placeholder="LosAngeles">
+                <div class="dropdown-content" id="start-cont">
+                </div>
+        </div>
     </div>
-    <div id="bottom-bar"></div>
+
+        <div class="to-box">
+            <h2>Destination City</h2>
+            <div class="dropdown">
+                <input type="text" class="dropbtn" id="searchInput-dest" onkeyup="filterFunction()" placeholder="NewYork">
+                <div class="dropdown-content" id="dest-cont">
+                </div>
+        </div>
+
+    </div>
+    </div>
     <div id="map"></div>
     <script src="./a_star.js"></script>
     

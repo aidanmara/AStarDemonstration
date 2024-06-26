@@ -473,46 +473,81 @@ async function build_iteration(startname, speed) {
 
 }
 
+var markerList = new Array();
+
+function set_markers(){
+    markerList.forEach(mark =>{
+        mark.setMap(null);
+    });
+    
+    markerList = new Array();
+
+    locData.locations.forEach(function(location) {
+        if (location.name == currentStart){
+            var marker = new google.maps.Marker({
+                position: { lat: location.lat, lng: location.lng },
+                map: map,
+                icon: {
+                    url: "./flag-alt-solid-24 (1).png",
+                },
+                title: location.name
+            });
+        }
+        else if(location.name == currentDestination){
+            var marker = new google.maps.Marker({
+                position: { lat: location.lat, lng: location.lng },
+                map: map,
+                icon: {
+                    url: "./flag-alt-solid-24.png",
+                },
+                title: location.name
+            });
+        }
+        else{
+            var marker = new google.maps.Marker({
+                position: { lat: location.lat, lng: location.lng },
+                map: map,
+                icon: {
+                    url: "./circle-solid-24.png",
+                    scaledSize: new google.maps.Size(12, 12)
+                },
+                title: location.name
+            });
+        }
+            
+
+        var infowindow = new google.maps.InfoWindow({
+            content: "<div style='color: black; font-weight: bold; background-color:#00000000; display:flex; flex-direction: column;'>" 
+                     + location.name 
+                     + "<button onClick=\"a_star('" + location.name + "', '" + currentDestination + "')\">Set As Start</button>"
+                     + "<button onClick=\"a_star('" + currentStart + "', '" + location.name + "')\">Set As Destination</button></div>"
+        });
+    
+        marker.addListener("click", function() {
+            infowindow.open(map, marker);
+
+        });
+    
+
+        markerList.push(marker)
+    });    
+}
 
 function build_map(){
     fetch('map_styling.json')
     .then(response => response.json())
     .then(data => {
+        
         var mapOptions = {
             center: { lat: 37.7749, lng: -95.4194 },
             zoom: 5,
             styles: data,
             disableDefaultUI: true,
-        };
+        }
 
         map = new google.maps.Map(document.getElementById('map'), mapOptions);
-        
-    
-        locData.locations.forEach(function(location) {
-            var marker = new google.maps.Marker({
-                position: { lat: location.lat, lng: location.lng },
-                map: map,
-                icon: {
-                    url: "./circle-solid-24.png", // Adjust the path if needed
-                    scaledSize: new google.maps.Size(12, 12) // Set the size here
-                },
-                title: location.name
-            });
 
-            var infowindow = new google.maps.InfoWindow({
-                content: "<div style='color: black; font-weight: bold; background-color:#00000000'>" + location.name + "</div>"
-            });
-        
-            marker.addListener("mouseover", function() {
-
-                infowindow.open(map, marker);
-            });
-        
-            marker.addListener("mouseout", function() {
-                infowindow.close();
-            });
-
-        });
+        set_markers();
 
         Object.keys(locData.adjacencies).forEach(function(city) {
             var cityLocation = locData.locations.find(loc => loc.name === city);
@@ -554,9 +589,44 @@ function build_map(){
 
 var eventHandle = new Array();
 var activePath = new Array();
+var activeBest = new Array();
 var bestpath = new Map();
 
+var currentStart = "LosAngeles"
+var currentDestination = "NewYork"
+
+function clear_path(path){
+    path.forEach(line => {
+        line.setMap(null);
+    });
+}
+
+function clear_map(){
+        clear_path(activePath);
+        activePath = new Array();
+        eventHandle = new Array();
+
+        clear_path(activeBest);
+        activeBest = new Array();
+        bestpath = new Map();
+}
+
+function setCurrentAndEnd(startname, endname){
+    currentStart = startname
+    currentDestination = endname
+
+    startText = document.getElementById("searchInput-start");
+    destText = document.getElementById("searchInput-dest");
+
+    startText.placeholder = currentStart;
+    destText.placeholder = currentDestination;
+
+    set_markers();
+}
+
 function a_star(startname, endname){
+        clear_map();
+        setCurrentAndEnd(startname, endname);
     
         startname = locData.locations.find(loc => loc.name === startname);        
         endname = locData.locations.find(loc => loc.name === endname);
@@ -670,9 +740,6 @@ function a_star(startname, endname){
         return null; // Failure, no path found
 }
 
-
-
-
 function reconstruct_path(cameFrom, current) {
     let totalPath = [current];
     while (cameFrom.has(current)) {
@@ -766,7 +833,8 @@ function display_path(){
             });
         
             explore.setMap(map);
-            index++;
+            activeBest.push(explore);
+            index++; 
         }
            
     }
@@ -777,6 +845,46 @@ function display_path(){
 
 }
 
+function set_start_dest_lists(){
+    const startContent = document.getElementById('start-cont');
+    const destContent = document.getElementById('dest-cont');
+    const start = currentStart;
+    const destination = currentDestination;
 
+    locData.locations.forEach(city => {
+        const anchor = document.createElement('a');
+        anchor.textContent = city.name;
+        anchor.setAttribute('onclick', `a_star('${city.name}', '${destination}')`);
+        startContent.appendChild(anchor);
+    });
+
+    locData.locations.forEach(city => {
+        const anchor = document.createElement('a');
+        anchor.textContent = city.name;
+        anchor.setAttribute('onclick', `a_star('${start}', '${city.name}')`);
+        destContent.appendChild(anchor);
+    });
+
+}
+
+function filterFunction() {
+    var input, filter, div, a, i;
+    input = document.getElementById("searchInput");
+    filter = input.value.toUpperCase();
+    div = document.getElementById("dropdownContent");
+    a = div.getElementsByTagName("a");
+    for (i = 0; i < a.length; i++) {
+        txtValue = a[i].textContent || a[i].innerText;
+        if (txtValue.toUpperCase().indexOf(filter) > -1) {
+            a[i].style.display = "";
+        } else {
+            a[i].style.display = "none";
+        }
+    }
+}
+
+
+
+a_star('LosAngeles', 'NewYork');
 build_map();
-check_heuristics();
+set_start_dest_lists();
