@@ -1,6 +1,7 @@
 body{
  background-color: black;   
  overflow: hidden;
+ font-family: Arial, Helvetica, sans-serif;
 }
 
 #gui{
@@ -18,16 +19,18 @@ body{
 #bottom-bar{
     display: flex;
     flex-direction: row;
+    justify-content: center;
     position: fixed;
     right: 0;
     bottom: 0;
     width: 70vw;
-    height: 10vh;
+    height: 20vh;
     background-color: black;
     z-index: 9;
 }
 
 #map {
+    background-color: black;
     height: 900px;
     width: 70%;
     top: 0;
@@ -45,16 +48,19 @@ body{
     flex-direction: column;
     align-content: center;
     margin: 10px;
+    margin-inline: 20px;
     }
 
 .to-box h2{
     color: #f1f1f1;
     margin: 5px;
+    margin-inline: 0px;
     }
 
 #dropdown {
     position: relative;
     display: inline-block;
+    z-index: 10;
 }
 
 .dropdown-content {
@@ -83,5 +89,5 @@ body{
 }
 
 .dropdown:hover .dropbtn {
-    background-color: #3e8e41;
+    background-color: #a3bea4;
 }

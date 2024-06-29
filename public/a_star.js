@@ -740,6 +740,39 @@ function a_star(startname, endname){
         return null; // Failure, no path found
 }
 
+function dijkstra(startname, endname) {
+    startText = startname;
+    endText = endname;
+
+    startname = locData.locations.find(loc => loc.name === startname);        
+    endname = locData.locations.find(loc => loc.name === endname);
+
+    let queue = new Queue();
+    let cameFrom = new Map();
+    let score = new Map();
+
+    locData.locations.forEach(node => score.set(node.name, Infinity));
+
+    score.set(startname.name, 0);
+
+    queue.enqueue(startname, score.get(startText));
+
+    while (!queue.isEmpty()) {
+
+        current = queue.dequeue();
+        let neighbors = locData.adjacencies[current];
+
+        neighbors.forEach(neighbor =>{
+            if ((neighbor.distance+score.get(current)) < score.get(neighbor.name)){
+                score.set(neighbor.name, neighbor.distance+score.get());
+                cameFrom.set(neighbor.name, current);
+            }
+        });
+    }
+    console.log(reconstruct_path(cameFrom, endname));
+    return reconstruct_path(cameFrom, endname);
+}
+
 function reconstruct_path(cameFrom, current) {
     let totalPath = [current];
     while (cameFrom.has(current)) {
@@ -870,8 +903,9 @@ function set_start_dest_lists(){
 function filterFunction() {
     var input, filter, div, a, i;
     input = document.getElementById("searchInput");
+    console.log(input);
     filter = input.value.toUpperCase();
-    div = document.getElementById("dropdownContent");
+    div = document.getElementById("dropdown-content");
     a = div.getElementsByTagName("a");
     for (i = 0; i < a.length; i++) {
         txtValue = a[i].textContent || a[i].innerText;
@@ -885,6 +919,19 @@ function filterFunction() {
 
 
 
-a_star('LosAngeles', 'NewYork');
-build_map();
+//IT IS VERY IMPORTANT THAT WE VALIDATE EVERY HUERISTIC IS SMALLER THAN ACTUAL DISTANCES
+//SO IF ANY LOCATIONS ARE ADDED, PLEASE RUN THIS OR ELSE IT MAY NOT WORK AS INTENDED.
+//V V V V V V V
+//check_heuristics();
+
+
+//ALSO VERY IMPORTANT THAT WE HAVE A BIDIRECTIONAL GRAPH UNLESS YOU ARE CERTAIN
+//YOU WILL ONLY RUN IT ONE DIRECTION.     |
+//SO RUN THIS IF ANY LOCATIONS ARE ADDED. V
+//check_symmetry();
+
+
+//a_star('LosAngeles', 'NewYork');
+dijkstra('LosAngeles', 'NewYork');
+//build_map();
 set_start_dest_lists();
