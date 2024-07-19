@@ -615,8 +615,8 @@ function setCurrentAndEnd(startname, endname){
     currentStart = startname
     currentDestination = endname
 
-    startText = document.getElementById("searchInput-start");
-    destText = document.getElementById("searchInput-dest");
+    startText = document.getElementById("searchInputFrom");
+    destText = document.getElementById("searchInputTo");
 
     startText.placeholder = currentStart;
     destText.placeholder = currentDestination;
@@ -651,8 +651,6 @@ function a_star(startname, endname){
                 let prediscoverPath = [];
                 let current = openQueue.extractMin().element;
                 visitedSet.add(current);
-
-
 
                 if (current != startname.name){    
                     
@@ -769,7 +767,6 @@ function dijkstra(startname, endname) {
             }
         });
     }
-    console.log(reconstruct_path(cameFrom, endname));
     return reconstruct_path(cameFrom, endname);
 }
 
@@ -884,28 +881,37 @@ function set_start_dest_lists(){
     const start = currentStart;
     const destination = currentDestination;
 
+    startContent.innerHTML = '';
+    destContent.innerHTML = '';
+
     locData.locations.forEach(city => {
-        const anchor = document.createElement('a');
-        anchor.textContent = city.name;
-        anchor.setAttribute('onclick', `a_star('${city.name}', '${destination}')`);
-        startContent.appendChild(anchor);
+        const startAnchor = document.createElement('a');
+        startAnchor.textContent = city.name;
+        startAnchor.setAttribute('onclick', `handle_astar_click('start-cont', '${city.name}', '${destination}')`);
+        startAnchor.setAttribute('onmouseover', `glow_hover('${city.name}', '${startAnchor}')`);
+        startContent.appendChild(startAnchor);
     });
 
     locData.locations.forEach(city => {
-        const anchor = document.createElement('a');
-        anchor.textContent = city.name;
-        anchor.setAttribute('onclick', `a_star('${start}', '${city.name}')`);
-        destContent.appendChild(anchor);
+        const destAnchor = document.createElement('a');
+        destAnchor.textContent = city.name;
+        destAnchor.setAttribute('onclick', `handle_astar_click('dest-cont', '${start}', '${city.name}')`);
+        
+        destContent.appendChild(destAnchor);
     });
-
 }
 
-function filterFunction() {
+
+function handle_astar_click(id,start,dest){
+    hide_dropdown(id)
+    a_star(start, dest)
+}
+
+function filterFunction(form, container) {
     var input, filter, div, a, i;
-    input = document.getElementById("searchInput");
-    console.log(input);
+    input = document.getElementById(form);
     filter = input.value.toUpperCase();
-    div = document.getElementById("dropdown-content");
+    div = document.getElementById(container);
     a = div.getElementsByTagName("a");
     for (i = 0; i < a.length; i++) {
         txtValue = a[i].textContent || a[i].innerText;
@@ -916,6 +922,45 @@ function filterFunction() {
         }
     }
 }
+
+function show_dropdown(dropdownId) {
+    var dropdown = document.getElementById(dropdownId);
+    if (dropdown) {
+        dropdown.style.display = "block";
+    }
+}
+
+function hide_dropdown(dropdownId) {
+    var dropdown = document.getElementById(dropdownId);
+    if (dropdown) {
+        dropdown.style.display = "None";
+    }
+}
+
+function glow_hover(city, div){
+    let citycoords = locData.locations.find(loc => loc.name === city);
+
+    if (citycoords){
+        var marker = new google.maps.Marker({
+            position: { lat: citycoords.lat, lng: citycoords.lng },
+            map: map,
+            icon: {
+                url: "./flag-alt-solid-24 (1).png",
+            },
+            animation: google.maps.Animation.BOUNCE
+        });
+
+
+        div.setAttribute('onmouseout', `remove_hover('${marker}')`);
+    }
+}
+
+
+
+function remove_hover(marker){
+    marker.setAnimation(null);
+}
+
 
 
 
@@ -931,7 +976,7 @@ function filterFunction() {
 //check_symmetry();
 
 
-//a_star('LosAngeles', 'NewYork');
-dijkstra('LosAngeles', 'NewYork');
-//build_map();
+a_star('LosAngeles', 'NewYork');
+//dijkstra('LosAngeles', 'NewYork');
+build_map();
 set_start_dest_lists();

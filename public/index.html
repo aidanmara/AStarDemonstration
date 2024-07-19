@@ -24,7 +24,7 @@
 
         <div class="to-box">
             <div class="dropdown">
-                <input type="text" class="dropbtn" id="searchInput" onkeyup="filterFunction()" placeholder="LosAngeles">
+                <input type="text" class="dropbtn" id="searchInputFrom" onfocus="show_dropdown('start-cont')" onkeyup="filterFunction('searchInputFrom', 'start-cont')" placeholder="LosAngeles">
                 <div class="dropdown-content" id="start-cont"></div>
             </div>
             <h2>Starting City</h2>
@@ -36,7 +36,7 @@
         <div class="to-box">
             
             <div class="dropdown">
-                <input type="text" class="dropbtn" id="searchInput" onkeyup="filterFunction()" placeholder="NewYork">
+                <input type="text" class="dropbtn" id="searchInputTo" onfocus="show_dropdown('dest-cont')" onkeyup="filterFunction('searchInputTo', 'dest-cont')" placeholder="NewYork">
                 <div class="dropdown-content" id="dest-cont"></div>
                 
             </div>

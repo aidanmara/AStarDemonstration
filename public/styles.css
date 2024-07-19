@@ -68,9 +68,11 @@ body{
     position: absolute;
     background-color: #f1f1f1;
     min-width: 160px;
+    max-height: 45vh;
+    overflow-y: auto;
     box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
-    z-index: 1;
-    bottom: 100%; /* Position the dropdown content above the dropdown button */
+    z-index: 100;
+    bottom: 100%;
 }
 
 .dropdown-content a {
@@ -87,6 +89,15 @@ body{
 .dropdown:hover .dropdown-content {
     display: block;
 }
+
+.dropdown-content:hover {
+    display: block;
+}
+
+.dropbtn:focus + .dropdown-content:hover{
+    display: block;
+}
+
 
 .dropdown:hover .dropbtn {
     background-color: #a3bea4;
