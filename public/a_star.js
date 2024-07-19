@@ -474,13 +474,15 @@ async function build_iteration(startname, speed) {
 }
 
 var markerList = new Array();
+var markerMap = new Map();
 
 function set_markers(){
     markerList.forEach(mark =>{
         mark.setMap(null);
     });
-    
-    markerList = new Array();
+
+    markerMap = new Map();
+    markerMap.clear();
 
     locData.locations.forEach(function(location) {
         if (location.name == currentStart){
@@ -509,7 +511,7 @@ function set_markers(){
                 map: map,
                 icon: {
                     url: "./circle-solid-24.png",
-                    scaledSize: new google.maps.Size(12, 12)
+                    scaledSize: new google.maps.Size(14, 14)
                 },
                 title: location.name
             });
@@ -517,18 +519,27 @@ function set_markers(){
             
 
         var infowindow = new google.maps.InfoWindow({
-            content: "<div style='color: black; font-weight: bold; background-color:#00000000; display:flex; flex-direction: column;'>" 
-                     + location.name 
-                     + "<button onClick=\"a_star('" + location.name + "', '" + currentDestination + "')\">Set As Start</button>"
-                     + "<button onClick=\"a_star('" + currentStart + "', '" + location.name + "')\">Set As Destination</button></div>"
+            content: `
+                <div style="color: black; font-weight: bold; background-color: #00000000; display: flex; flex-direction: column;">
+                    ${location.name}
+                    <button onClick="a_star('${location.name}', '${currentDestination}')">Set As Start</button>
+                    <button onClick="a_star('${currentStart}', '${location.name}')">Set As Destination</button>
+                </div>
+            `
+            ,
+            pixelOffset: new google.maps.Size(0, -15) // Adjust the vertical offset here
         });
     
         marker.addListener("click", function() {
             infowindow.open(map, marker);
 
         });
-    
 
+        marker.addListener('mouseover', function() {
+            glow_hover_mouse(location.name, marker);
+        });
+
+        markerMap.set(location.name, marker);
         markerList.push(marker)
     });    
 }
@@ -888,7 +899,7 @@ function set_start_dest_lists(){
         const startAnchor = document.createElement('a');
         startAnchor.textContent = city.name;
         startAnchor.setAttribute('onclick', `handle_astar_click('start-cont', '${city.name}', '${destination}')`);
-        startAnchor.setAttribute('onmouseover', `glow_hover('${city.name}', '${startAnchor}')`);
+        startAnchor.addEventListener('mouseover', () => glow_hover(city.name, startAnchor));
         startContent.appendChild(startAnchor);
     });
 
@@ -896,7 +907,7 @@ function set_start_dest_lists(){
         const destAnchor = document.createElement('a');
         destAnchor.textContent = city.name;
         destAnchor.setAttribute('onclick', `handle_astar_click('dest-cont', '${start}', '${city.name}')`);
-        
+        destAnchor.addEventListener('mouseover', () => glow_hover(city.name, destAnchor));
         destContent.appendChild(destAnchor);
     });
 }
@@ -930,38 +941,43 @@ function show_dropdown(dropdownId) {
     }
 }
 
-function hide_dropdown(dropdownId) {
+function hide_dropdown(dropdownId, inputField) {
     var dropdown = document.getElementById(dropdownId);
     if (dropdown) {
         dropdown.style.display = "None";
     }
-}
-
-function glow_hover(city, div){
-    let citycoords = locData.locations.find(loc => loc.name === city);
-
-    if (citycoords){
-        var marker = new google.maps.Marker({
-            position: { lat: citycoords.lat, lng: citycoords.lng },
-            map: map,
-            icon: {
-                url: "./flag-alt-solid-24 (1).png",
-            },
-            animation: google.maps.Animation.BOUNCE
-        });
-
-
-        div.setAttribute('onmouseout', `remove_hover('${marker}')`);
+    
+    if (inputField) {
+        var inputElement = document.getElementById(inputField);
+        if (inputElement) {
+            inputElement.blur(); // Unfocus the input field
+        }
     }
 }
 
+function glow_hover(city, div) {
+    let citycoords = locData.locations.find(loc => loc.name === city);
+    let marker = markerMap.get(city);
 
+    if (citycoords && marker) {
+        marker.setAnimation(google.maps.Animation.BOUNCE);
 
-function remove_hover(marker){
-    marker.setAnimation(null);
+        function removeMarker() {
+            marker.setAnimation(null);
+            div.removeEventListener('mouseout', removeMarker); 
+        }
+
+        div.addEventListener('mouseout', removeMarker);
+    }
 }
 
+function glow_hover_mouse(city, marker) {
+    marker.setAnimation(google.maps.Animation.BOUNCE);
 
+    marker.addListener('mouseout', function removeMarkerAnimation() {
+        marker.setAnimation(null);
+    });
+}
 
 
 //IT IS VERY IMPORTANT THAT WE VALIDATE EVERY HUERISTIC IS SMALLER THAN ACTUAL DISTANCES
