@@ -606,23 +606,45 @@ var bestpath = new Map();
 var currentStart = "LosAngeles"
 var currentDestination = "NewYork"
 
+var currentAlgo = "A*";
+
+async function run_reconstruct() {
+    speed = document.getElementById("speed-range").value;
+    await clear_lines();
+    await show_events(speed);
+    display_path();
+}
+
 function clear_path(path){
     path.forEach(line => {
         line.setMap(null);
     });
 }
 
-function clear_map(){
+function clear_lines() {
+    return new Promise(resolve => {
         clear_path(activePath);
-        activePath = new Array();
-        eventHandle = new Array();
-
         clear_path(activeBest);
-        activeBest = new Array();
-        bestpath = new Map();
+        resolve();
+    });
 }
 
-function setCurrentAndEnd(startname, endname){
+function clear_map() {
+    return new Promise(resolve => {
+        clear_path(activePath);
+        activePath = [];
+        eventHandle = [];
+
+        clear_path(activeBest);
+        activeBest = [];
+        bestpath = new Map();
+        
+        resolve();
+    });
+}
+    
+
+function set_current_and_end(startname, endname){
     currentStart = startname
     currentDestination = endname
 
@@ -632,12 +654,16 @@ function setCurrentAndEnd(startname, endname){
     startText.placeholder = currentStart;
     destText.placeholder = currentDestination;
 
+    let title = document.getElementById("title");
+    title.innerHTML = `<h1>${currentAlgo} Pathfinding from ${startname} to ${endname}</h1>`;
+
     set_markers();
 }
 
 function a_star(startname, endname){
         clear_map();
-        setCurrentAndEnd(startname, endname);
+        currentAlgo = "A*";
+        set_current_and_end(startname, endname);
     
         startname = locData.locations.find(loc => loc.name === startname);        
         endname = locData.locations.find(loc => loc.name === endname);
@@ -648,6 +674,7 @@ function a_star(startname, endname){
         let cameFrom = new Map();
 
         let gScore = new Map();
+        const startTime = performance.now();
         locData.locations.forEach(node => gScore.set(node.name, Infinity));
         gScore.set(startname.name, 0);
 
@@ -714,11 +741,25 @@ function a_star(startname, endname){
 
                 bestpath = reconstruct_path(cameFrom, current);
 
+                let astarTime = quiet_astar(startname.name, endname.name);
+                let dijkstraTime = quiet_dijkstra(startname.name, endname.name);
+
+                let performanceText = document.getElementById("performance");
+                performanceText.innerHTML = `<h1>Time to converge: ${astarTime.toFixed(8)}ms</h1>`;
+                
+                let efficiencyText = document.getElementById("efficiency");
+                efficiencyText.style.color = "#32a852";
+                console.log(astarTime);
+                console.log(dijkstraTime);
+                let eff = (dijkstraTime - astarTime)
+                efficiencyText.innerHTML = `<h1> ${eff.toFixed(3)}ms faster than Dijkstra's </h1>`;
+
+
+
                 return reconstruct_path(cameFrom, current);
             }
 
             var neighbors = locData.adjacencies[current];
-            console.log(current);
 
             neighbors.forEach(neighbor => {
                 let gScoreTemp = gScore.get(current) + neighbor.distance;
@@ -746,40 +787,262 @@ function a_star(startname, endname){
 
         //build_iteration(startname, 1);
 
-        return null; // Failure, no path found
+        return null; 
 }
 
 function dijkstra(startname, endname) {
-    startText = startname;
-    endText = endname;
-
+    clear_map();
+    currentAlgo = "Djikstra's";
+    set_current_and_end(startname, endname);
+    
     startname = locData.locations.find(loc => loc.name === startname);        
     endname = locData.locations.find(loc => loc.name === endname);
 
-    let queue = new Queue();
+    let openQueue = new PriorityQueue();
+    let visitedSet = new Set();
     let cameFrom = new Map();
-    let score = new Map();
 
-    locData.locations.forEach(node => score.set(node.name, Infinity));
+    const startTime = performance.now();
 
-    score.set(startname.name, 0);
+    let gScore = new Map();
+    locData.locations.forEach(node => gScore.set(node.name, Infinity));
+    gScore.set(startname.name, 0);
 
-    queue.enqueue(startname, score.get(startText));
+    openQueue.enqueue(startname.name, gScore.get(startname.name));
 
-    while (!queue.isEmpty()) {
+    while (!openQueue.isEmpty()) {
+        let iterationData = new Object();
+        let prediscoverPath = [];
+        let current = openQueue.extractMin().element;
+        visitedSet.add(current);
 
-        current = queue.dequeue();
-        let neighbors = locData.adjacencies[current];
+        if (current != startname.name){    
+            let currentCoords = locData.locations.find(loc => loc.name === current);
+            let lastCoords = locData.locations.find(loc => loc.name === cameFrom.get(current));
 
-        neighbors.forEach(neighbor =>{
-            if ((neighbor.distance+score.get(current)) < score.get(neighbor.name)){
-                score.set(neighbor.name, neighbor.distance+score.get());
+            let pathCoords = [
+                {lat: currentCoords.lat, lng: currentCoords.lng},
+                {lat: lastCoords.lat, lng: lastCoords.lng},
+            ];
+
+            let explore = new google.maps.Polyline({
+                path: pathCoords,
+                geodesic: true,
+                strokeColor: "#D3D8C4",
+                strokeOpacity: 1.0,
+                strokeWeight: 3,
+                zIndex: 50
+            });
+        
+            prediscoverPath.push(explore);
+        }
+
+        if (current === endname.name) {
+            let currentCoords = locData.locations.find(loc => loc.name === current);
+            let lastCoords = locData.locations.find(loc => loc.name === endname.name);
+
+            let pathCoords = [
+                {lat: currentCoords.lat, lng: currentCoords.lng},
+                {lat: lastCoords.lat, lng: lastCoords.lng},
+            ];
+
+            let explore = new google.maps.Polyline({
+                path: pathCoords,
+                geodesic: true,
+                strokeColor: "#D3D8C4",
+                strokeOpacity: 1.0,
+                strokeWeight: 3,
+                zIndex: 50
+            });
+    
+            prediscoverPath.push(explore);
+            iterationData['edges'] = prediscoverPath;
+            eventHandle.push(iterationData);
+
+            bestpath = reconstruct_path(cameFrom, current);
+
+            let endTime = performance.now();
+
+            let performanceText = document.getElementById("performance");
+            performanceText.innerHTML = `<h1>Time to converge: ${(endTime - startTime).toFixed(8)}ms</h1>`;
+
+            let efficiencyText = document.getElementById("efficiency");
+            efficiencyText.style.color = "#944941"; 
+            let eff = (dijkstraTime - astarTime)
+            efficiencyText.innerHTML = `<h1> ${eff.toFixed(3)}ms slower than Dijkstra's </h1>`;
+
+            return reconstruct_path(cameFrom, current);
+        }
+
+        var neighbors = locData.adjacencies[current];
+
+        neighbors.forEach(neighbor => {
+            let gScoreTemp = gScore.get(current) + neighbor.distance;
+
+            if (gScoreTemp < gScore.get(neighbor.name)) {
                 cameFrom.set(neighbor.name, current);
+                gScore.set(neighbor.name, gScoreTemp);
+
+                if (!visitedSet.has(neighbor.name)) {
+                    openQueue.enqueue(neighbor.name, gScore.get(neighbor.name));
+                }
+            }
+        });
+
+        iterationData['edges'] = prediscoverPath;
+        eventHandle.push(iterationData);
+    }
+
+    return null;
+}
+
+function quiet_astar(startname, endname){
+    startname = locData.locations.find(loc => loc.name === startname);        
+    endname = locData.locations.find(loc => loc.name === endname);
+
+    let openQueue = new PriorityQueue();
+    let visitedSet = new Set();
+    let cameFrom = new Map();
+
+    let gScore = new Map();
+    const startTime = performance.now();
+    locData.locations.forEach(node => gScore.set(node.name, Infinity));
+    gScore.set(startname.name, 0);
+
+    let fScore = new Map();
+    locData.locations.forEach(node => fScore.set(node.name, Infinity));
+    fScore.set(startname.name, calculate_estimated_distances(startname, endname));
+
+    openQueue.enqueue(startname.name, fScore.get(startname.name));
+
+    while (!openQueue.isEmpty()) {
+        let current = openQueue.extractMin().element;
+        visitedSet.add(current);
+
+        if (current === endname.name) {
+            let endTime = performance.now();
+            let performanceText = document.getElementById("performance");
+            performanceText.innerHTML = `<h1>Time to converge: ${(endTime - startTime).toFixed(2)} ms</h1>`;
+            return endTime - startTime;
+        }
+
+        var neighbors = locData.adjacencies[current];
+
+        neighbors.forEach(neighbor => {
+            let gScoreTemp = gScore.get(current) + neighbor.distance;
+
+            if (gScoreTemp < gScore.get(neighbor.name)) {
+                cameFrom.set(neighbor.name, current);
+                gScore.set(neighbor.name, gScoreTemp);
+
+                let neighborCoords = locData.locations.find(loc => loc.name === neighbor.name);
+                fScore.set(neighbor.name, gScoreTemp + calculate_estimated_distances(neighborCoords, endname));
+
+                if (!visitedSet.has(neighbor.name)) {
+                    openQueue.enqueue(neighbor.name, fScore.get(neighbor.name));
+                }
             }
         });
     }
-    return reconstruct_path(cameFrom, endname);
+    return null;
 }
+
+function quiet_dijkstra(startname, endname) {
+    //clear_map();
+    //set_current_and_end(startname, endname);
+    
+    startname = locData.locations.find(loc => loc.name === startname);        
+    endname = locData.locations.find(loc => loc.name === endname);
+
+    let openQueue = new PriorityQueue();
+    let visitedSet = new Set();
+    let cameFrom = new Map();
+
+    const startTime = performance.now();
+
+    let gScore = new Map();
+    locData.locations.forEach(node => gScore.set(node.name, Infinity));
+    gScore.set(startname.name, 0);
+
+    openQueue.enqueue(startname.name, gScore.get(startname.name));
+
+    while (!openQueue.isEmpty()) {
+        let iterationData = new Object();
+        let prediscoverPath = [];
+        let current = openQueue.extractMin().element;
+        visitedSet.add(current);
+
+        if (current != startname.name){    
+            let currentCoords = locData.locations.find(loc => loc.name === current);
+            let lastCoords = locData.locations.find(loc => loc.name === cameFrom.get(current));
+
+            let pathCoords = [
+                {lat: currentCoords.lat, lng: currentCoords.lng},
+                {lat: lastCoords.lat, lng: lastCoords.lng},
+            ];
+
+            let explore = new google.maps.Polyline({
+                path: pathCoords,
+                geodesic: true,
+                strokeColor: "#D3D8C4",
+                strokeOpacity: 1.0,
+                strokeWeight: 3,
+                zIndex: 50
+            });
+        
+            prediscoverPath.push(explore);
+        }
+
+        if (current === endname.name) {
+            let currentCoords = locData.locations.find(loc => loc.name === current);
+            let lastCoords = locData.locations.find(loc => loc.name === endname.name);
+
+            let pathCoords = [
+                {lat: currentCoords.lat, lng: currentCoords.lng},
+                {lat: lastCoords.lat, lng: lastCoords.lng},
+            ];
+
+            let explore = new google.maps.Polyline({
+                path: pathCoords,
+                geodesic: true,
+                strokeColor: "#D3D8C4",
+                strokeOpacity: 1.0,
+                strokeWeight: 3,
+                zIndex: 50
+            });
+    
+            prediscoverPath.push(explore);
+            iterationData['edges'] = prediscoverPath;
+            eventHandle.push(iterationData);
+
+            bestpath = reconstruct_path(cameFrom, current);
+
+            let endTime = performance.now();
+            return (endTime - startTime);
+        }
+
+        var neighbors = locData.adjacencies[current];
+
+        neighbors.forEach(neighbor => {
+            let gScoreTemp = gScore.get(current) + neighbor.distance;
+
+            if (gScoreTemp < gScore.get(neighbor.name)) {
+                cameFrom.set(neighbor.name, current);
+                gScore.set(neighbor.name, gScoreTemp);
+
+                if (!visitedSet.has(neighbor.name)) {
+                    openQueue.enqueue(neighbor.name, gScore.get(neighbor.name));
+                }
+            }
+        });
+
+        //iterationData['edges'] = prediscoverPath;
+        //eventHandle.push(iterationData);
+    }
+
+    return null;
+}
+
 
 function reconstruct_path(cameFrom, current) {
     let totalPath = [current];
@@ -823,32 +1086,28 @@ function check_symmetry(){
     console.log(nonAdmis);
 }
 
-function show_events(speed){
-    let index = 0;
+function show_events(speed) {
+    return new Promise(resolve => {
+        let index = 0;
 
-    function processs_next_event() {
-        if (index < eventHandle.length) {
-            eventHandle[index]['edges'].forEach( edge => {
-                edge.setMap(map);
-                activePath.push(edge);
-            });
-            index++;
-            setTimeout(processs_next_event, speed*1000); // Set timeout for 1 second (1000 milliseconds)
+        function process_next_event() {
+            if (index < eventHandle.length) {
+                eventHandle[index]['edges'].forEach(edge => {
+                    edge.setMap(map);
+                    activePath.push(edge);
+                });
+                index++;
+                setTimeout(process_next_event, speed * 1000); // Set timeout in milliseconds
+            } else {
+                resolve();
+            }
         }
-    }
 
-    processs_next_event();
+        process_next_event();
+    });
 }
 
-
 function display_path(){
-
-    function delete_temp_path(){
-        activePath.forEach( edge => {
-            edge.setMap(null);
-        })
-        setTimeout(draw_best_path, 100);
-    }
 
     function draw_best_path(){
         let index = 0;
@@ -880,10 +1139,7 @@ function display_path(){
            
     }
 
-    delete_temp_path();
-
-    
-
+    setTimeout(draw_best_path, 100);
 }
 
 function set_start_dest_lists(){
@@ -979,6 +1235,78 @@ function glow_hover_mouse(city, marker) {
     });
 }
 
+var slider = document.getElementById("speed-range");
+var output = document.getElementById("speed-text");
+output.innerHTML = `Speed: ${slider.value} s`;
+
+slider.oninput = function() {
+  output.innerHTML = `Speed: ${this.value} s`;
+}
+
+var switchButton = document.getElementById("switch-button");
+
+switchButton.addEventListener("click", function() {
+    if (currentAlgo == "A*"){
+        dijkstra(currentStart, currentDestination);
+        switchButton.innerHTML = "Switch to A*";
+    }
+    else if(currentAlgo == "Djikstra's"){
+        a_star(currentStart, currentDestination);
+        switchButton.innerHTML = "Switch to Dijkstra's";
+    }
+})
+
+function createAdjacencyMatrix() {
+    let table = document.getElementById("adjacency-table-cont-cont");
+    let locations = locData.locations;
+    let cities = locations.map(loc => loc.name);
+
+    let n = cities.length;
+    let adjacencyMatrix = Array.from({ length: n }, () => Array(n).fill(Infinity));
+
+    cities.forEach((city, i) => {
+        let neighbors = locData.adjacencies[city] || [];
+        neighbors.forEach(neighbor => {
+            let j = cities.indexOf(neighbor.name);
+            if (j !== -1) {
+                adjacencyMatrix[i][j] = neighbor.distance;
+            }
+        });
+    });
+
+    let matrixTable = document.getElementById("adjacency-table");
+    
+    let headerRow = matrixTable.insertRow();
+    headerRow.insertCell().appendChild(document.createTextNode(" "));
+    cities.forEach(city => {
+        headerRow.insertCell().appendChild(document.createTextNode(city));
+    });
+
+    cities.forEach((city, i) => {
+        let row = matrixTable.insertRow();
+        row.insertCell().appendChild(document.createTextNode(city));
+        adjacencyMatrix[i].forEach(distance => {
+            row.insertCell().appendChild(document.createTextNode(distance === Infinity ? "∞" : distance));
+        });
+    });
+
+    table.appendChild(matrixTable);
+    
+    //let bigTable = document.getElementById("adjacency-table-max");
+    //bigTable.innerHTML = matrixTable.innerHTML;
+}
+
+// Run the function to create the matrix
+createAdjacencyMatrix();
+
+document.getElementById("expand-table").addEventListener("click", function() {
+    var table = document.getElementById("adjacency-table");
+    table.classList.toggle("expanded");
+    table = document.getElementById("adjacency-table-cont");
+    table.classList.toggle("expanded");
+});
+
+
 
 //IT IS VERY IMPORTANT THAT WE VALIDATE EVERY HUERISTIC IS SMALLER THAN ACTUAL DISTANCES
 //SO IF ANY LOCATIONS ARE ADDED, PLEASE RUN THIS OR ELSE IT MAY NOT WORK AS INTENDED.
@@ -994,5 +1322,6 @@ function glow_hover_mouse(city, marker) {
 
 a_star('LosAngeles', 'NewYork');
 //dijkstra('LosAngeles', 'NewYork');
+//quiet_dijkstra('LosAngeles', 'NewYork');
 build_map();
 set_start_dest_lists();
