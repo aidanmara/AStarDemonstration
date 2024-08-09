@@ -521,8 +521,8 @@ function set_markers(){
             content: `
                 <div style="color: black; font-weight: bold; background-color: #00000000; display: flex; flex-direction: column;">
                     ${location.name}
-                    <button onClick="a_star('${location.name}', '${currentDestination}')">Set As Start</button>
-                    <button onClick="a_star('${currentStart}', '${location.name}')">Set As Destination</button>
+                    <button onClick="handle_marker_click(start='${location.name}', dest='${currentDestination}')">Set As Start</button>
+                    <button onClick="handle_marker_click(start='${currentStart}',  dest='${location.name}')">Set As Destination</button>
                 </div>
             `
             ,
@@ -669,11 +669,6 @@ function set_current_and_end(startname, endname){
 }
 
 function a_star(startname, endname){
-        clear_map();
-        currentAlgo = "A*";
-        set_current_and_end(startname, endname);
-        reset_adj_mat()
-    
         startname = locData.locations.find(loc => loc.name === startname);        
         endname = locData.locations.find(loc => loc.name === endname);
 
@@ -799,11 +794,7 @@ function a_star(startname, endname){
 
 
 function dijkstra(startname, endname) {
-    clear_map();
-    currentAlgo = "Djikstra's";
-    set_current_and_end(startname, endname);
-    reset_adj_mat()
-    
+
     startname = locData.locations.find(loc => loc.name === startname);        
     endname = locData.locations.find(loc => loc.name === endname);
 
@@ -976,8 +967,6 @@ function quiet_astar(startname, endname){
 }
 
 function quiet_dijkstra(startname, endname) {
-    //clear_map();
-    //set_current_and_end(startname, endname);
     
     startname = locData.locations.find(loc => loc.name === startname);        
     endname = locData.locations.find(loc => loc.name === endname);
@@ -1127,7 +1116,7 @@ function show_events() {
             if (index < eventHandle.length && pid === check) {
                 let speed = document.getElementById("speed-range").value;
 
-                unhighlight_city(); // Unhighlight previous city
+                unhighlight_city(); 
 
                 let event = eventHandle[index];
 
@@ -1149,16 +1138,17 @@ function show_events() {
                     updateAdjacencyMatrix(event['visitedCity'], event['visitedCities']);
                 }
 
-                // Sync the "big" table's content with the main table
                 bigTable.innerHTML = table.innerHTML;
 
                 index++;
                 setTimeout(process_next_event, speed * 1000);
+                console.log(eventHandle);
             } else {
                 if (pid === check) {
-                    setTimeout(display_path, 1); // Proceed to display the path if not interrupted
-                    resolve(); // Resolve the promise when done
+                    setTimeout(display_path, 1); 
+                    resolve(); 
                 }
+                resolve(); 
             }
         }
 
@@ -1218,9 +1208,6 @@ function unhighlight_city() {
     });
 }
 
-
-
-
 function updateAdjacencyMatrix(currentCity, visitedCities) {
     let table = document.getElementById("adjacency-table");
     
@@ -1242,9 +1229,6 @@ function updateAdjacencyMatrix(currentCity, visitedCities) {
         }
     });
 }
-
-
-
 
 function display_path(){
 
@@ -1310,8 +1294,17 @@ function set_start_dest_lists(){
 
 function handle_astar_click(id,start,dest){
     hide_dropdown(id)
-    a_star(start, dest)
+    set_current_and_end(start, dest);
+    clear_map();
+    set_start_dest_lists();
 }
+
+function handle_marker_click(start,dest){
+    set_current_and_end(start, dest);
+    clear_map();
+    set_start_dest_lists();
+}
+
 
 function filterFunction(form, container) {
     var input, filter, div, a, i;
@@ -1345,7 +1338,7 @@ function hide_dropdown(dropdownId, inputField) {
     if (inputField) {
         var inputElement = document.getElementById(inputField);
         if (inputElement) {
-            inputElement.blur(); // Unfocus the input field
+            inputElement.blur();
         }
     }
 }
@@ -1386,12 +1379,17 @@ var switchButton = document.getElementById("switch-button");
 
 switchButton.addEventListener("click", function() {
     if (currentAlgo == "A*"){
-        dijkstra(currentStart, currentDestination);
+        currentAlgo = "Dijkstra's";
         switchButton.innerHTML = "Switch to A*";
+        clear_map();
+        set_current_and_end(currentStart, currentDestination);
+        reset_adj_mat()
     }
-    else if(currentAlgo == "Djikstra's"){
-        a_star(currentStart, currentDestination);
+    else if(currentAlgo == "Dijkstra's"){
+        currentAlgo = "A*";
         switchButton.innerHTML = "Switch to Dijkstra's";
+        clear_map();
+        set_current_and_end(currentStart, currentDestination);
     }
 })
 
@@ -1474,21 +1472,36 @@ function create_adj_mat_a() {
 create_adj_mat_a();
 
 document.getElementById("expand-table").addEventListener("click", function() {
-    var table = document.getElementById("adjacency-table");
+    var table = document.getElementById("adjacency-table-cont");
     table.classList.toggle("expanded");
-    table = document.getElementById("max-table-cont");
-    table.classList.toggle("expanded");
+
+    tableMax = document.getElementById("max-table-cont");
+    tableMax.classList.toggle("expanded");
 });
 
 let collapseButton = document.getElementById("max-collapse");
 
     collapseButton.addEventListener("click", function() {
-        var table = document.getElementById("adjacency-table");
+        var table = document.getElementById("adjacency-table-cont");
         table.classList.toggle("expanded");
         table = document.getElementById("max-table-cont");
         table.classList.toggle("expanded");
 });
 
+
+function call_and_display(){
+    
+    if (currentAlgo == "A*"){
+        clear_map();
+        a_star(currentStart, currentDestination);
+    }
+    else if (currentAlgo == "Dijkstra's"){
+        clear_map();
+        dijkstra(currentStart, currentDestination);
+    }
+
+    run_reconstruct();
+}
 
 
 
@@ -1504,7 +1517,7 @@ let collapseButton = document.getElementById("max-collapse");
 //check_symmetry();
 
 
-a_star('LosAngeles', 'NewYork');
+//a_star('LosAngeles', 'NewYork');
 //dijkstra('LosAngeles', 'NewYork');
 //quiet_dijkstra('LosAngeles', 'NewYork');
 build_map();

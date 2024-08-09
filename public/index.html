@@ -13,7 +13,9 @@
     <div id = "title" class="title"><h1>A* Pathfinding from LosAngeles to New York</h1></div>
     <div id = "best-path" class="best-path">
         <h2>Shortest Path:</h2>
-        <div id = "best-path-li" class="best-path-li"></div>
+        <div id = "best-path-li" class="best-path-li">
+
+        </div>
     </div>
     <div class="hud">
     <div id = "performance" class="performance"></div>
@@ -32,7 +34,7 @@
     <div id="adjacency-table-cont" class="adjacency-table-cont">
         <div class="adjacency-table-title">
             <h2>Adjacency Table</h2>
-            <button id = "expand-table" class = "expand-table"> expand </button>
+            <img id = "expand-table" class = "expand-table" src="./expand-regular-24.png" title="Expand Table"/>
         </div>
         <div id="adjacency-table-cont-cont" class="adjacency-table-cont-cont">
             <table id="adjacency-table" class="adjacency-table">
@@ -44,7 +46,7 @@
     </div>
 
     <div id="max-table-cont" class="max-table-cont">
-        <img name='collapse-alt' id="max-collapse" class="max-collapse" src="./collapse-alt-regular-24.png"/>
+        <img name='collapse-alt' id="max-collapse" class="max-collapse" src="./collapse-alt-regular-24.png" title="Minimize Table"/>
         <table id="adjacency-table-max" class="adjacency-table-max"></table>
     </div>
     
@@ -77,7 +79,7 @@
         </div>
 
         <div class="button-cont">
-            <button class="start-button" onclick="run_reconstruct()">START</button>
+            <button class="start-button" onclick="call_and_display()">START</button>
             <button id = "switch-button" class="switch-button">Switch to Dijkstra's</button>
         </div>
     </div>
