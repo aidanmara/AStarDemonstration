@@ -28,7 +28,13 @@
     <div id="gui">
     <div id="gen-info" class="gen-info">
         <h1>A* Algorithm Visualizer</h1>
-        <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Porro corrupti maiores voluptatibus quae doloribus dignissimos ad, ea rem sunt natus placeat repudiandae amet optio sed molestiae vitae praesentium fuga qui!</p>
+        <div class="gen-info-desc">
+        <p>This interactive A* algorithm visualizer provides a clear and intuitive way to explore the A* pathfinding algorithm on weighted graphs. Ideal for students, educators, and enthusiasts alike, the tool enables users to visualize how the A* algorithm efficiently finds the shortest path between a start and goal node on a graph with varying edge weights.</p>
+        <p>The map features 44 cities across the United States, with distances based on real-life driving routes between each city. Users can select any city as the start or destination by using the search input at the bottom of the screen or by clicking directly on the map and choosing the respective option.</p>
+        <p>In the bottom-left corner, the adjacency graph displays the actual distances between cities and updates in real time as the algorithm progresses. Users can expand this graph for a more detailed view. The visualization speed can be adjusted in the bottom-right corner, allowing for closer inspection of each step or faster playback.        </p>        
+        <p>Additionally, you can switch to Dijkstra's algorithm to compare the two methods by simply clicking the switch button, also located in the bottom-right of the screen. This feature lets you see the differences in how each algorithm processes the graph and determines the shortest path.</p>
+        <p>Explore, learn, and enjoy as you dive into the mechanics of heuristic-based pathfinding and witness the A* algorithm in action!</p>
+        </div>
     </div>
 
     <div id="adjacency-table-cont" class="adjacency-table-cont">
@@ -41,6 +47,18 @@
                 
             </table>
         </div>
+    </div>
+
+    <div class="more-info">
+        <div class="github">
+            <img src="./github-logo-24.png">
+            <h3>View on GitHub</h3>
+        </div>
+
+        <div class="read-more">
+            <h3>Read More</h3>
+        </div>
+
     </div>
 
     </div>
@@ -65,7 +83,7 @@
 
         </div>
 
-        <img id="gui-arrow" style="width: fit-content; height:25%; align-self: center;"  src="./temparrow.png"/>
+        <img id="gui-arrow" style="width: fit-content; height:25%; align-self: center; filter: brightness(0) saturate(100%) invert(44%) sepia(13%) saturate(1071%) hue-rotate(57deg) brightness(102%) contrast(89%); "  src="./temparrow.png"/>
 
         <div class="to-box">
             
@@ -79,7 +97,7 @@
         </div>
 
         <div class="button-cont">
-            <button class="start-button" onclick="call_and_display()">START</button>
+            <button class="start-button" onclick="call_and_display()">Run</button>
             <button id = "switch-button" class="switch-button">Switch to Dijkstra's</button>
         </div>
     </div>

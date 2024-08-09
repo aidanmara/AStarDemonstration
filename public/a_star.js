@@ -1241,7 +1241,7 @@ function display_path(){
             let explore = new google.maps.Polyline({
                 path: pathCoords,
                 geodesic: true,
-                strokeColor: "#00FF00",
+                strokeColor: "#618152",
                 strokeOpacity: 1.0,
                 strokeWeight: 4,
                 zIndex: 52
