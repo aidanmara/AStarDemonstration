@@ -11,6 +11,10 @@
 </head>
 <body>
     <div id = "title" class="title"><h1>A* Pathfinding from LosAngeles to New York</h1></div>
+    <div id = "best-path" class="best-path">
+        <h2>Shortest Path:</h2>
+        <div id = "best-path-li" class="best-path-li"></div>
+    </div>
     <div class="hud">
     <div id = "performance" class="performance"></div>
     <div id = "efficiency" class="efficiency"></div>
@@ -39,7 +43,11 @@
 
     </div>
 
-    <table id="adjacency-table-max" class="adjacency-table-max">
+    <div id="max-table-cont" class="max-table-cont">
+        <img name='collapse-alt' id="max-collapse" class="max-collapse" src="./collapse-alt-regular-24.png"/>
+        <table id="adjacency-table-max" class="adjacency-table-max"></table>
+    </div>
+    
                 
     </table>
 

@@ -415,7 +415,6 @@ function calculate_estimated_distances(current, endname){
     //calculate the heuristic function for each name 
 
     heuristicScore = haversine(current.lat, current.lng, endname.lat, endname.lng);
-
     return heuristicScore;
 }
 
@@ -608,11 +607,19 @@ var currentDestination = "NewYork"
 
 var currentAlgo = "A*";
 
+var timeoutID = ""
+
 async function run_reconstruct() {
-    speed = document.getElementById("speed-range").value;
-    await clear_lines();
-    await show_events(speed);
-    display_path();
+    await clear_lines(); 
+    await set_pid();
+    await show_events(); 
+}
+
+function set_pid() {
+    return new Promise(resolve => {
+        pid++;
+        resolve();
+    });
 }
 
 function clear_path(path){
@@ -631,6 +638,7 @@ function clear_lines() {
 
 function clear_map() {
     return new Promise(resolve => {
+
         clear_path(activePath);
         activePath = [];
         eventHandle = [];
@@ -664,12 +672,12 @@ function a_star(startname, endname){
         clear_map();
         currentAlgo = "A*";
         set_current_and_end(startname, endname);
+        reset_adj_mat()
     
         startname = locData.locations.find(loc => loc.name === startname);        
         endname = locData.locations.find(loc => loc.name === endname);
 
         let openQueue = new PriorityQueue();
-        console.log(openQueue);
         let visitedSet = new Set();
         let cameFrom = new Map();
 
@@ -689,6 +697,7 @@ function a_star(startname, endname){
                 let prediscoverPath = [];
                 let current = openQueue.extractMin().element;
                 visitedSet.add(current);
+                iterationData['visitedCity'] = current;
 
                 if (current != startname.name){    
                     
@@ -736,10 +745,8 @@ function a_star(startname, endname){
                 eventHandle.push(iterationData);
 
 
-
-                console.log(reconstruct_path(cameFrom, current));
-
                 bestpath = reconstruct_path(cameFrom, current);
+                display_best_path(bestpath, gScore.get(current));
 
                 let astarTime = quiet_astar(startname.name, endname.name);
                 let dijkstraTime = quiet_dijkstra(startname.name, endname.name);
@@ -749,8 +756,6 @@ function a_star(startname, endname){
                 
                 let efficiencyText = document.getElementById("efficiency");
                 efficiencyText.style.color = "#32a852";
-                console.log(astarTime);
-                console.log(dijkstraTime);
                 let eff = (dijkstraTime - astarTime)
                 efficiencyText.innerHTML = `<h1> ${eff.toFixed(3)}ms faster than Dijkstra's </h1>`;
 
@@ -760,6 +765,7 @@ function a_star(startname, endname){
             }
 
             var neighbors = locData.adjacencies[current];
+            iterationData['visitedCities'] = new Array;
 
             neighbors.forEach(neighbor => {
                 let gScoreTemp = gScore.get(current) + neighbor.distance;
@@ -770,6 +776,7 @@ function a_star(startname, endname){
 
                     let neighborCoords = locData.locations.find(loc => loc.name === neighbor.name);
                     fScore.set(neighbor.name, gScoreTemp + calculate_estimated_distances(neighborCoords, endname));
+                    iterationData['visitedCities'].push([neighbor.name, gScore.get(neighbor.name)]);
     
                     if (!visitedSet.has(neighbor.name)) {
                         openQueue.enqueue(neighbor.name, fScore.get(neighbor.name));
@@ -785,15 +792,17 @@ function a_star(startname, endname){
             eventHandle.push(iterationData);
         }
 
-        //build_iteration(startname, 1);
 
         return null; 
 }
+
+
 
 function dijkstra(startname, endname) {
     clear_map();
     currentAlgo = "Djikstra's";
     set_current_and_end(startname, endname);
+    reset_adj_mat()
     
     startname = locData.locations.find(loc => loc.name === startname);        
     endname = locData.locations.find(loc => loc.name === endname);
@@ -815,6 +824,7 @@ function dijkstra(startname, endname) {
         let prediscoverPath = [];
         let current = openQueue.extractMin().element;
         visitedSet.add(current);
+        iterationData['visitedCity'] = current;
 
         if (current != startname.name){    
             let currentCoords = locData.locations.find(loc => loc.name === current);
@@ -861,31 +871,35 @@ function dijkstra(startname, endname) {
 
             bestpath = reconstruct_path(cameFrom, current);
 
+            display_best_path(bestpath,gScore.get(current));
+
             let endTime = performance.now();
+            let dijkstraTime = (endTime - startTime);
+            let astarTime = quiet_astar(startname.name,endname.name);
 
             let performanceText = document.getElementById("performance");
             performanceText.innerHTML = `<h1>Time to converge: ${(endTime - startTime).toFixed(8)}ms</h1>`;
 
             let efficiencyText = document.getElementById("efficiency");
             efficiencyText.style.color = "#944941"; 
-            let eff = (dijkstraTime - astarTime)
-            efficiencyText.innerHTML = `<h1> ${eff.toFixed(3)}ms slower than Dijkstra's </h1>`;
+            let eff = (dijkstraTime - astarTime);
+            efficiencyText.innerHTML = `<h1> ${eff.toFixed(3)}ms slower than A* </h1>`;
 
             return reconstruct_path(cameFrom, current);
         }
 
         var neighbors = locData.adjacencies[current];
-
+        iterationData['visitedCities'] = new Array;
+        
         neighbors.forEach(neighbor => {
             let gScoreTemp = gScore.get(current) + neighbor.distance;
 
             if (gScoreTemp < gScore.get(neighbor.name)) {
                 cameFrom.set(neighbor.name, current);
                 gScore.set(neighbor.name, gScoreTemp);
+                iterationData['visitedCities'].push([neighbor.name, gScore.get(neighbor.name)]);
 
-                if (!visitedSet.has(neighbor.name)) {
-                    openQueue.enqueue(neighbor.name, gScore.get(neighbor.name));
-                }
+                openQueue.enqueue(neighbor.name, gScore.get(neighbor.name));
             }
         });
 
@@ -894,6 +908,22 @@ function dijkstra(startname, endname) {
     }
 
     return null;
+}
+
+function display_best_path(bestPath,gScore){
+    let bestPathDiv = document.getElementById("best-path-li");
+
+    bestPathDiv.innerHTML = "";
+
+    bestPath.forEach(stop => {
+        let listItem = document.createElement("h3");
+        listItem.textContent = stop;
+        bestPathDiv.appendChild(listItem);
+    });
+
+    let totalScoreItem = document.createElement("h3");
+    totalScoreItem.textContent = `Total distance: ${gScore.toFixed(2)}mi`;
+    bestPathDiv.appendChild(totalScoreItem);
 }
 
 function quiet_astar(startname, endname){
@@ -921,8 +951,6 @@ function quiet_astar(startname, endname){
 
         if (current === endname.name) {
             let endTime = performance.now();
-            let performanceText = document.getElementById("performance");
-            performanceText.innerHTML = `<h1>Time to converge: ${(endTime - startTime).toFixed(2)} ms</h1>`;
             return endTime - startTime;
         }
 
@@ -1085,27 +1113,138 @@ function check_symmetry(){
 
     console.log(nonAdmis);
 }
+var pid = 0; // Process ID tracker
 
-function show_events(speed) {
+function show_events() {
     return new Promise(resolve => {
+        const check = ++pid; // Increment and use a new unique ID for each execution
         let index = 0;
+        reset_adj_mat();
+        let table = document.getElementById("adjacency-table");
+        let bigTable = document.getElementById("adjacency-table-max");
 
         function process_next_event() {
-            if (index < eventHandle.length) {
-                eventHandle[index]['edges'].forEach(edge => {
-                    edge.setMap(map);
-                    activePath.push(edge);
-                });
+            if (index < eventHandle.length && pid === check) {
+                let speed = document.getElementById("speed-range").value;
+
+                unhighlight_city(); // Unhighlight previous city
+
+                let event = eventHandle[index];
+
+                // Display the edges on the map
+                if (event['edges']) {
+                    event['edges'].forEach(edge => {
+                        edge.setMap(map);
+                        activePath.push(edge);
+                    });
+                }
+
+                // Highlight the current city and its neighbors
+                if (event['visitedCity']) {
+                    highlight_city(event['visitedCity'], event['visitedCities']);
+                }
+
+                // Update the adjacency matrix with the current city's values
+                if (event['visitedCities']) {
+                    updateAdjacencyMatrix(event['visitedCity'], event['visitedCities']);
+                }
+
+                // Sync the "big" table's content with the main table
+                bigTable.innerHTML = table.innerHTML;
+
                 index++;
-                setTimeout(process_next_event, speed * 1000); // Set timeout in milliseconds
+                setTimeout(process_next_event, speed * 1000);
             } else {
-                resolve();
+                if (pid === check) {
+                    setTimeout(display_path, 1); // Proceed to display the path if not interrupted
+                    resolve(); // Resolve the promise when done
+                }
             }
         }
 
         process_next_event();
     });
 }
+
+function highlight_city(city, neighbors) {
+    let table = document.getElementById("adjacency-table");
+    
+    let headerCell = table.querySelector(`th[data-city="${city}"]`);
+    if (headerCell) {
+        headerCell.classList.add("highlight");
+    }
+    let row = table.querySelector(`tr[data-city="${city}"]`);
+
+    if (row) {
+        row.classList.add("highlight");
+        Array.from(row.children).forEach(cell => cell.classList.add("highlight"));
+    }
+
+    let columnIndex = Array.from(table.querySelectorAll("tr")[0].children)
+                           .findIndex(cell => cell.textContent === city);
+    if (columnIndex !== -1) {
+        table.querySelectorAll(`tr:not(:first-child) td:nth-child(${columnIndex + 1})`)
+             .forEach(cell => cell.classList.add("highlight"));
+    }
+
+
+    if (neighbors && neighbors.length != 0){
+        neighbors.forEach(neighbor => {
+            let neighborRow = table.querySelector(`tr[data-city="${neighbor[0]}"]`);
+            if (neighborRow) {
+                // Highlight the cell in the row of the neighbor
+                let neighborCell = neighborRow.children[columnIndex];
+                if (neighborCell) {
+                    neighborCell.classList.add("highlight-update");
+                }
+            }
+
+            let neighborColumnIndex = Array.from(table.querySelectorAll("tr:first-child th"))
+                                        .findIndex(cell => cell.getAttribute("data-city") === neighbor[0]);
+            if (neighborColumnIndex !== -1) {
+                table.querySelectorAll(`tr:not(:first-child) td:nth-child(${neighborColumnIndex + 1})`)
+                    .forEach(cell => cell.classList.add("highlight-update"));
+            }
+        });
+    }
+}
+
+function unhighlight_city() {
+    let highlightedElements = document.querySelectorAll('.highlight, .highlight-update');
+
+    highlightedElements.forEach(element => {
+        element.classList.remove('highlight');
+        element.classList.remove('highlight-update');
+    });
+}
+
+
+
+
+function updateAdjacencyMatrix(currentCity, visitedCities) {
+    let table = document.getElementById("adjacency-table");
+    
+    // Update the row for the current city
+    let currentRow = table.querySelector(`tr[data-city="${currentCity}"]`);
+    let currentColIndex = Array.from(table.querySelectorAll("tr")[0].children)
+                               .findIndex(cell => cell.textContent === currentCity);
+    
+    visitedCities.forEach(([neighborCity, distance]) => {
+        let neighborRow = table.querySelector(`tr[data-city="${neighborCity}"]`);
+        let neighborColIndex = Array.from(table.querySelectorAll("tr")[0].children)
+                                    .findIndex(cell => cell.textContent === neighborCity);
+        
+        if (currentRow && neighborRow) {
+            // Update cell at currentRow and neighborColIndex with distance
+            currentRow.children[neighborColIndex].textContent = distance.toFixed(2);
+            // Update cell at neighborRow and currentColIndex with distance
+            neighborRow.children[currentColIndex].textContent = distance.toFixed(2);
+        }
+    });
+}
+
+
+
 
 function display_path(){
 
@@ -1129,7 +1268,7 @@ function display_path(){
                 strokeColor: "#00FF00",
                 strokeOpacity: 1.0,
                 strokeWeight: 4,
-                zIndex: 51
+                zIndex: 52
             });
         
             explore.setMap(map);
@@ -1256,8 +1395,32 @@ switchButton.addEventListener("click", function() {
     }
 })
 
-function createAdjacencyMatrix() {
-    let table = document.getElementById("adjacency-table-cont-cont");
+function reset_adj_mat() {
+    let table = document.getElementById("adjacency-table");
+    let locations = locData.locations;
+    let cities = locations.map(loc => loc.name);
+
+    // Reset all cells to "∞"
+    for (let i = 1; i < table.rows.length; i++) {
+        let row = table.rows[i];
+
+        for (let j = 1; j < row.cells.length; j++) {
+            row.cells[j].textContent = "∞";
+        }
+    }
+
+    // Update the cell at the current destination column to "0"
+    let destColumnIndex = cities.indexOf(currentDestination);
+    for (let i = 1; i < table.rows.length; i++) {
+        let row = table.rows[i];
+        if (row.getAttribute("data-city") === currentDestination) {
+            row.cells[destColumnIndex + 1].textContent = "0";
+        }
+    }
+}
+
+function create_adj_mat_a() {
+    let table = document.getElementById("adjacency-table");
     let locations = locData.locations;
     let cities = locations.map(loc => loc.name);
 
@@ -1274,37 +1437,58 @@ function createAdjacencyMatrix() {
         });
     });
 
-    let matrixTable = document.getElementById("adjacency-table");
-    
-    let headerRow = matrixTable.insertRow();
+    // Create header row
+    let headerRow = table.insertRow();
     headerRow.insertCell().appendChild(document.createTextNode(" "));
     cities.forEach(city => {
-        headerRow.insertCell().appendChild(document.createTextNode(city));
+        let headerCell = headerRow.insertCell();
+        headerCell.appendChild(document.createTextNode(city));
+        headerCell.setAttribute("data-city", city);
     });
 
+    // Find the column index for the current destination
+    let destColumnIndex = cities.indexOf(currentDestination);
+
+    // Create rows for the matrix
     cities.forEach((city, i) => {
-        let row = matrixTable.insertRow();
+        let row = table.insertRow();
         row.insertCell().appendChild(document.createTextNode(city));
-        adjacencyMatrix[i].forEach(distance => {
-            row.insertCell().appendChild(document.createTextNode(distance === Infinity ? "∞" : distance));
+        row.setAttribute("data-city", city);
+
+        adjacencyMatrix[i].forEach((distance, j) => {
+            let cell = row.insertCell();
+            // Set the cell at the current destination column to "0"
+            if (city === currentDestination && j === destColumnIndex) {
+                cell.appendChild(document.createTextNode("0"));
+            } else {
+                cell.appendChild(document.createTextNode("∞"));
+            }
         });
     });
-
-    table.appendChild(matrixTable);
     
-    //let bigTable = document.getElementById("adjacency-table-max");
-    //bigTable.innerHTML = matrixTable.innerHTML;
+    let bigTable = document.getElementById("adjacency-table-max");
+    bigTable.innerHTML = table.innerHTML;
 }
 
 // Run the function to create the matrix
-createAdjacencyMatrix();
+create_adj_mat_a();
 
 document.getElementById("expand-table").addEventListener("click", function() {
     var table = document.getElementById("adjacency-table");
     table.classList.toggle("expanded");
-    table = document.getElementById("adjacency-table-cont");
+    table = document.getElementById("max-table-cont");
     table.classList.toggle("expanded");
 });
+
+let collapseButton = document.getElementById("max-collapse");
+
+    collapseButton.addEventListener("click", function() {
+        var table = document.getElementById("adjacency-table");
+        table.classList.toggle("expanded");
+        table = document.getElementById("max-table-cont");
+        table.classList.toggle("expanded");
+});
+
 
 
 
