@@ -92,85 +92,85 @@ class PriorityQueue {
 
 var locData = {
     locations: [
-        { name: 'NewYork', lat: 40.712776, lng: -74.005974 },
-        { name: 'LosAngeles', lat: 34.052235, lng: -118.243683 },
+        { name: 'New York', lat: 40.712776, lng: -74.005974 },
+        { name: 'Los Angeles', lat: 34.052235, lng: -118.243683 },
         { name: 'Chicago', lat: 41.878113, lng: -87.629799 },
         { name: 'Houston', lat: 29.760427, lng: -95.369804 },
         { name: 'Phoenix', lat: 33.448376, lng: -112.074036 },
         { name: 'Philadelphia', lat: 39.952583, lng: -75.165222 },
-        { name: 'SanAntonio', lat: 29.424122, lng: -98.493629 },
-        { name: 'SanDiego', lat: 32.715736, lng: -117.161087 },
+        { name: 'San Antonio', lat: 29.424122, lng: -98.493629 },
+        { name: 'San Diego', lat: 32.715736, lng: -117.161087 },
         { name: 'Dallas', lat: 32.776665, lng: -96.796989 },
-        { name: 'SanJose', lat: 37.338207, lng: -121.886330 },
+        { name: 'San Jose', lat: 37.338207, lng: -121.886330 },
         { name: 'Jacksonville', lat: 30.332184, lng: -81.655647 },
         { name: 'Columbus', lat: 39.961178, lng: -82.998795 },
         { name: 'Charlotte', lat: 35.227085, lng: -80.843124 },
-        { name: 'SanFrancisco', lat: 37.774929, lng: -122.419418 },
+        { name: 'San Francisco', lat: 37.774929, lng: -122.419418 },
         { name: 'Indianapolis', lat: 39.768403, lng: -86.158068 },
         { name: 'Seattle', lat: 47.606209, lng: -122.332069 },
         { name: 'Denver', lat: 39.739236, lng: -104.990251 },
-        { name: 'WashingtonDC', lat: 38.907192, lng: -77.036871 },
+        { name: 'Washington DC', lat: 38.907192, lng: -77.036871 },
         { name: 'Boston', lat: 42.360082, lng: -71.058880 },
-        { name: 'ElPaso', lat: 31.761878, lng: -106.485022 },
+        { name: 'El Paso', lat: 31.761878, lng: -106.485022 },
         { name: 'Nashville', lat: 36.162663, lng: -86.781601 },
         { name: 'Detroit', lat: 42.331427, lng: -83.045754 },
         { name: 'Memphis', lat: 35.149534, lng: -90.048980 },
         { name: 'Portland', lat: 45.512794, lng: -122.679565 },
-        { name: 'LasVegas', lat: 36.169941, lng: -115.139830 },
+        { name: 'Las Vegas', lat: 36.169941, lng: -115.139830 },
         { name: 'Louisville', lat: 38.252665, lng: -85.758456 },
         { name: 'Milwaukee', lat: 43.038902, lng: -87.906474 },
         { name: 'Albuquerque', lat: 35.084386, lng: -106.650422 },
         { name: 'Fresno', lat: 36.737798, lng: -119.787125 },
         { name: 'Sacramento', lat: 38.581572, lng: -121.494400 },
         { name: 'Atlanta', lat: 33.748995, lng: -84.387982 },
-        { name: 'KansasCity', lat: 39.099727, lng: -94.578567 },
+        { name: 'Kansas City', lat: 39.099727, lng: -94.578567 },
         { name: 'Miami', lat: 25.761680, lng: -80.191790 },
         { name: 'Raleigh', lat: 35.779590, lng: -78.638179 },
         { name: 'Omaha', lat: 41.256538, lng: -95.934502 },
         { name: 'Minneapolis', lat: 44.977753, lng: -93.265011 },
         { name: 'Tulsa', lat: 36.153981, lng: -95.992775 },
         { name: 'Wichita', lat: 37.687176, lng: -97.330053 },
-        { name: 'NewOrleans', lat: 29.951065, lng: -90.071533 },
+        { name: 'New Orleans', lat: 29.951065, lng: -90.071533 },
         { name: 'Cleveland', lat: 41.499320, lng: -81.694360 },
         { name: 'Boise', lat: 43.615021, lng: -116.202316 },
         { name: 'Spokane', lat: 47.658779, lng: -117.426048 },
-        { name: 'SaltLakeCity', lat: 40.760780, lng: -111.891045 },
+        { name: 'Salt Lake City', lat: 40.760780, lng: -111.891045 },
         { name: 'Helena', lat: 46.589145, lng: -112.039105 },
         { name: 'Billings', lat: 45.783285, lng: -108.500690 },
 
     ],
     adjacencies: {
-        'NewYork': [
+        'New York': [
             { name: 'Philadelphia', distance: 97.2 },
             { name: 'Boston', distance: 215 },
             { name: 'Cleveland', distance: 460 }
         ],
         'Philadelphia': [
-            { name: 'NewYork', distance: 97.2 },
-            { name: 'WashingtonDC', distance: 140 }
+            { name: 'New York', distance: 97.2 },
+            { name: 'Washington DC', distance: 140 }
         ],
         'Boston': [
-            { name: 'NewYork', distance: 215 }
+            { name: 'New York', distance: 215 }
         ],
         'Cleveland': [
-            { name: 'NewYork', distance: 460 },
+            { name: 'New York', distance: 460 },
             { name: 'Detroit', distance: 170 },
             { name: 'Columbus', distance: 142 }
         ],
-        'LosAngeles': [
-            { name: 'SanDiego', distance: 120 },
-            { name: 'SanJose', distance: 340 },
-            { name: 'LasVegas', distance: 270 },
+        'Los Angeles': [
+            { name: 'San Diego', distance: 120 },
+            { name: 'San Jose', distance: 340 },
+            { name: 'Las Vegas', distance: 270 },
             { name: 'Fresno', distance: 221 },
             { name: 'Phoenix', distance: 373 }
         ],
-        'SanDiego': [
-            { name: 'LosAngeles', distance: 120 },
+        'San Diego': [
+            { name: 'Los Angeles', distance: 120 },
             { name: 'Phoenix', distance: 355 }
         ],
-        'SanJose': [
-            { name: 'SanFrancisco', distance: 48 },
-            { name: 'LosAngeles', distance: 340 },
+        'San Jose': [
+            { name: 'San Francisco', distance: 48 },
+            { name: 'Los Angeles', distance: 340 },
             { name: 'Sacramento', distance: 121 },
             { name: 'Fresno', distance: 152 }
         ],
@@ -188,7 +188,7 @@ var locData = {
         ],
         'Louisville': [
             { name: 'Indianapolis', distance: 115 },
-            { name: 'KansasCity', distance: 508 },
+            { name: 'Kansas City', distance: 508 },
             { name: 'Nashville', distance: 175 },
         ],
         'Milwaukee': [
@@ -208,50 +208,50 @@ var locData = {
             { name: 'Indianapolis', distance: 176 },
             { name: 'Detroit', distance: 204 },
             { name: 'Cleveland', distance: 142 },
-            { name: 'WashingtonDC', distance: 410 }
+            { name: 'Washington DC', distance: 410 }
         ],
         'Houston': [
-            { name: 'SanAntonio', distance: 197 },
+            { name: 'San Antonio', distance: 197 },
             { name: 'Dallas', distance: 239 },
-            { name: 'NewOrleans', distance: 348 }
+            { name: 'New Orleans', distance: 348 }
         ],
-        'SanAntonio': [
+        'San Antonio': [
             { name: 'Houston', distance: 197 },
             { name: 'Dallas', distance: 274 },
-            { name: 'ElPaso', distance: 552 }
+            { name: 'El Paso', distance: 552 }
         ],
         'Dallas': [
             { name: 'Houston', distance: 239 },
-            { name: 'SanAntonio', distance: 274 },
+            { name: 'San Antonio', distance: 274 },
             { name: 'Tulsa', distance: 240 },
         ],
         'Phoenix': [
-            { name: 'SanDiego', distance: 355 },
-            { name: 'LasVegas', distance: 297 },
+            { name: 'San Diego', distance: 355 },
+            { name: 'Las Vegas', distance: 297 },
             { name: 'Albuquerque', distance: 419 },
-            { name: 'LosAngeles', distance: 373 },
-            {name: 'ElPaso', distance: 430 },
+            { name: 'Los Angeles', distance: 373 },
+            {name: 'El Paso', distance: 430 },
         ],
-        'ElPaso': [
-            { name: 'SanAntonio', distance: 552 },
+        'El Paso': [
+            { name: 'San Antonio', distance: 552 },
             { name: 'Phoenix', distance: 430 },
             { name: 'Albuquerque', distance: 266 }
         ],
         'Albuquerque': [
             { name: 'Phoenix', distance: 419 },
-            { name: 'ElPaso', distance: 266 },
+            { name: 'El Paso', distance: 266 },
             { name: 'Denver', distance: 449 },
             { name : 'Wichita', distance: 595.5}
         ],
         'Denver': [
-            { name: 'KansasCity', distance: 605 },
-            { name: 'SaltLakeCity', distance: 520 },
+            { name: 'Kansas City', distance: 605 },
+            { name: 'Salt Lake City', distance: 520 },
             { name: 'Albuquerque', distance: 449 },
             { name: 'Omaha', distance: 540 },
             { name: 'Boise', distance: 836 },
             { name: 'Billings', distance: 554 },
         ],
-        'WashingtonDC': [
+        'Washington DC': [
             { name: 'Philadelphia', distance: 140 },
             { name: 'Raleigh', distance: 278 },
             { name: 'Columbus', distance: 410 }
@@ -263,14 +263,14 @@ var locData = {
         ],
         'Boise': [
             { name: 'Helena', distance: 346 },
-            { name: 'SaltLakeCity', distance: 344 },
+            { name: 'Salt Lake City', distance: 344 },
             { name: 'Seattle', distance: 496 },
             { name: 'Denver', distance: 836 },
             { name: 'Portland', distance: 430 },
         ],
-        'SaltLakeCity': [
+        'Salt Lake City': [
             { name: 'Boise', distance: 344 },
-            { name: 'LasVegas', distance: 421 },
+            { name: 'Las Vegas', distance: 421 },
             { name: 'Denver', distance: 520 }
         ],
         'Spokane': [
@@ -294,55 +294,55 @@ var locData = {
             { name: 'Nashville', distance: 410 }
         ],
         'Raleigh': [
-            { name: 'WashingtonDC', distance: 278 },
+            { name: 'Washington DC', distance: 278 },
             { name: 'Charlotte', distance: 130 },
         ],
         'Atlanta': [
             { name: 'Charlotte', distance: 244 },
             { name: 'Jacksonville', distance: 346 },
-            { name: 'NewOrleans', distance: 470 },
+            { name: 'New Orleans', distance: 470 },
             { name: 'Memphis', distance: 384 }
         ],
         'Nashville': [
             { name: 'Memphis', distance: 210 },
             { name: 'Louisville', distance: 175 },
-            { name: 'KansasCity', distance: 553 },
+            { name: 'Kansas City', distance: 553 },
             { name: 'Charlotte', distance: 410 }
         ],
         'Memphis': [
             { name: 'Nashville', distance: 210 },
-            { name: 'NewOrleans', distance: 395 },
+            { name: 'New Orleans', distance: 395 },
             { name: 'Atlanta', distance: 384 },
             { name: 'Tulsa', distance: 390 },
         ],
         'Portland': [
             { name: 'Seattle', distance: 174 },
-            { name: 'SanFrancisco', distance: 634 },
+            { name: 'San Francisco', distance: 634 },
             { name: 'Boise', distance: 430 }
         ],
-        'SanFrancisco': [
-            { name: 'SanJose', distance: 48 },
+        'San Francisco': [
+            { name: 'San Jose', distance: 48 },
             { name: 'Sacramento', distance: 87 },
             { name: 'Portland', distance: 634 }
         ],
         'Fresno': [
-            { name: 'SanJose', distance: 152 },
-            { name: 'LosAngeles', distance: 221 },
+            { name: 'San Jose', distance: 152 },
+            { name: 'Los Angeles', distance: 221 },
             { name: 'Sacramento', distance: 172 },
         ],
         'Sacramento': [
-            { name: 'SanFrancisco', distance: 87 },
-            { name: 'SanJose', distance: 121 },
+            { name: 'San Francisco', distance: 87 },
+            { name: 'San Jose', distance: 121 },
             { name: 'Fresno', distance: 172 },
-            { name: 'LasVegas', distance: 562 }
+            { name: 'Las Vegas', distance: 562 }
         ],
-        'LasVegas': [
-            { name: 'LosAngeles', distance: 270 },
+        'Las Vegas': [
+            { name: 'Los Angeles', distance: 270 },
             { name: 'Phoenix', distance: 297 },
-            { name: 'SaltLakeCity', distance: 421 },
+            { name: 'Salt Lake City', distance: 421 },
             { name: 'Sacramento', distance: 562 }
         ],
-        'KansasCity': [
+        'Kansas City': [
             { name: 'Denver', distance: 605 },
             { name: 'Wichita', distance: 198 },
             { name: 'Tulsa', distance: 275 },
@@ -353,20 +353,20 @@ var locData = {
         'Wichita': [
             { name : 'Wichita', distance: 595.5},
             { name: 'Tulsa', distance: 180 },
-            { name: 'KansasCity', distance: 198 },
+            { name: 'Kansas City', distance: 198 },
             { name : 'Albuquerque', distance: 595.5}
         ],
         'Tulsa': [
             { name: 'Dallas', distance: 240 },
             { name: 'Memphis', distance: 390 },
-            { name: 'NewOrleans', distance: 635 },
-            { name: 'KansasCity', distance: 275 },
+            { name: 'New Orleans', distance: 635 },
+            { name: 'Kansas City', distance: 275 },
             { name: 'Wichita', distance: 180 }
         ],
         'Omaha': [
             { name: 'Chicago', distance: 470 },
             { name: 'Minneapolis', distance: 382 },
-            { name: 'KansasCity', distance: 185 },
+            { name: 'Kansas City', distance: 185 },
             { name: 'Denver', distance: 540 }
         ],
         'Minneapolis': [
@@ -374,7 +374,7 @@ var locData = {
             { name: 'Billings', distance: 824 },
             { name: 'Omaha', distance: 382 }
         ],
-        'NewOrleans': [
+        'New Orleans': [
             { name: 'Atlanta', distance: 470 },
             { name: 'Houston', distance: 348 },
             { name: 'Memphis', distance: 395 },
@@ -428,8 +428,6 @@ async function drawlines(currentCity, speed){
         await new Promise(resolve => setTimeout(resolve, index * (speed * 1000)));
 
         var adjacentnameLocation = locData.locations.find(loc => loc.name === city.name);
-
-        console.log(adjacentnameLocation);
         
         var pathCoordinates = [
             { lat: currentCity.lat, lng: currentCity.lng },
@@ -457,8 +455,6 @@ async function drawlines(currentCity, speed){
 
 async function build_iteration(startname, speed) {
     var currentpaths = await drawlines(startname, speed);
-
-    console.log(currentpaths);
 
     setTimeout(() => {
     
@@ -519,8 +515,8 @@ function set_markers(){
 
         var infowindow = new google.maps.InfoWindow({
             content: `
-                <div style="color: black; font-weight: bold; background-color: #00000000; display: flex; flex-direction: column;">
-                    ${location.name}
+                <div class="info-window">
+                    <h1>${location.name}</h1>
                     <button onClick="handle_marker_click(start='${location.name}', dest='${currentDestination}')">Set As Start</button>
                     <button onClick="handle_marker_click(start='${currentStart}',  dest='${location.name}')">Set As Destination</button>
                 </div>
@@ -602,8 +598,8 @@ var activePath = new Array();
 var activeBest = new Array();
 var bestpath = new Map();
 
-var currentStart = "LosAngeles"
-var currentDestination = "NewYork"
+var currentStart = "Los Angeles"
+var currentDestination = "New York"
 
 var currentAlgo = "A*";
 
@@ -1090,7 +1086,6 @@ function check_symmetry(){
     let nonAdmis = [];
     locData.locations.forEach(location => {
         locData.adjacencies[location.name].forEach( adjacentCity => {
-
             let city = locData.adjacencies[adjacentCity.name].find(loc => loc.name === location.name);
 
             if (city == null){
@@ -1142,7 +1137,6 @@ function show_events() {
 
                 index++;
                 setTimeout(process_next_event, speed * 1000);
-                console.log(eventHandle);
             } else {
                 if (pid === check) {
                     setTimeout(display_path, 1); 
@@ -1238,8 +1232,6 @@ function display_path(){
         while(index < bestpath.length-1){
             let currentCoords = locData.locations.find(loc => loc.name === bestpath[index]);
             let lastCoords = locData.locations.find(loc => loc.name === bestpath[index+1]);
-
-            console.log(currentCoords)
         
             let pathCoords = [
                 {lat: currentCoords.lat, lng: currentCoords.lng},
