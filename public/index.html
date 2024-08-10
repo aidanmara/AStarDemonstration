@@ -1,15 +1,63 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>California Travel Map</title>
+    <title>A* Visualizer</title>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="styles.css" />
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDcWDbgCB6ZoN-dY4Jxis-m5Ae4du_M8gM"></script>
+    <style>
+        .landscape-message {
+            display: none;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            top: 0;
+            width: 98vw;
+            overflow: hidden;
+            background-color: #612521; 
+            color: white;
+            text-align: center;
+            font-size: 1.2rem;
+            z-index: 1000; 
+            justify-self: center;
+            align-self: center;
+        }
 
-    
+        @media only screen and (orientation: portrait) {
+            .landscape-message {
+                display: block;
+            }
+
+            .about-cont, 
+            .hud, 
+            .slide-container, 
+            #gui, 
+            #map, 
+            .return-button, 
+            #bottom-bar, 
+            #max-table-cont, 
+            #title, 
+            #best-path {
+                display: none;
+            }
+            body{
+                overflow: none;
+                width: 100%;
+                height: 98vh;
+                align-items: center;
+                justify-content: center;
+            }
+
+            
+        }
+    </style>
 </head>
+
 <body>
+    <div class="landscape-message">
+        Portrait support is not available<br>Please view this page in browser.
+    </div>
     <div id = "title" class="title"><h1>A* Pathfinding from Los Angeles to New York</h1></div>
     <div id = "best-path" class="best-path">
         <h2>Shortest Path:</h2>
@@ -50,12 +98,14 @@
     </div>
 
     <div class="more-info">
+        <a href="https://github.com/aidanmara/AStarDemonstration" target="_blank">
         <div class="github">
             <img src="./github-logo-24.png">
             <h3>View on GitHub</h3>
         </div>
+        </a>
 
-        <div class="read-more">
+        <div class="read-more" onclick="read_more()">
             <h3>Read More</h3>
         </div>
 
@@ -76,7 +126,7 @@
         <div class="to-from">
         <div class="to-box">
             <div class="dropdown">
-                <input type="text" class="dropbtn" id="searchInputFrom" onfocus="show_dropdown('start-cont')" onkeyup="filterFunction('searchInputFrom', 'start-cont')" placeholder="LosAngeles">
+                <input type="text" class="dropbtn" id="searchInputFrom" onfocus="show_dropdown('start-cont')" onkeyup="filterFunction('searchInputFrom', 'start-cont')" placeholder="Los Angeles">
                 <div class="dropdown-content" id="start-cont" onmouseleave="hide_dropdown('start-cont','searchInputFrom')"></div>
             </div>
             <h1>Starting City</h1>
@@ -88,7 +138,7 @@
         <div class="to-box">
             
             <div class="dropdown">
-                <input type="text" class="dropbtn" id="searchInputTo" onfocus="show_dropdown('dest-cont')" onkeyup="filterFunction('searchInputTo', 'dest-cont')" placeholder="NewYork">
+                <input type="text" class="dropbtn" id="searchInputTo" onfocus="show_dropdown('dest-cont')" onkeyup="filterFunction('searchInputTo', 'dest-cont')" placeholder="New York">
                 <div class="dropdown-content" id="dest-cont" onmouseleave="hide_dropdown('dest-cont','searchInputTo')"></div>
                 
             </div>
@@ -103,6 +153,12 @@
     </div>
     <div id="map"></div>
     <script src="./a_star.js"></script>
+
+    <script>
+        function read_more(){
+            window.location.href = 'about.html'
+        }
+    </script>
     
 </body>
 </html>

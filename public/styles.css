@@ -414,11 +414,18 @@
         position: relative;
         display: inline-block;
         z-index: 10;
+        transition: .2s;
     }
 
     .dropbtn{
         width: 12vw;
         height: 5vh;
+        border-radius: 5px;
+        padding-inline-start: 5%;
+    }
+
+    .dropbtn text{
+        margin-left: 5%;
     }
 
     .dropdown-content {
@@ -458,6 +465,8 @@
 
 
     .dropdown:hover .dropbtn {
+        transform: scale(1.06);
+        transition: .2s;
         background-color: #a3bea4;
     }
 
@@ -683,3 +692,9 @@
         border-radius: 10px;
     }
     
+
+    a{
+        text-decoration: none;
+        color: #ddd;
+    }
+
