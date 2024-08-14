@@ -1463,7 +1463,7 @@ switchButton.addEventListener("click", function() {
     if (currentAlgo == "A*"){
         currentAlgo = "Dijkstra's";
         //update UI
-        switchButton.innerHTML = "Switch to A*";
+        switchButton.innerHTML = "Switch <br> to A*";
         
         // Reset the map, new start and end, and adj matrix ui
         clear_map();
@@ -1474,7 +1474,7 @@ switchButton.addEventListener("click", function() {
         //Set to A*
         currentAlgo = "A*";
         //Update UI
-        switchButton.innerHTML = "Switch to Dijkstra's";
+        switchButton.innerHTML = "Switch to <br> Dijkstra's";
         // Reset the map, new start and end, and adj matrix ui
         clear_map();
         set_current_and_end(currentStart, currentDestination);
@@ -1600,6 +1600,9 @@ function call_and_display(){
     // Run the Vizualisation process
     run_reconstruct();
 }
+
+
+
 
 
 

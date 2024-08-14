@@ -5,9 +5,8 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="styles.css" />
-    <link rel="icon" href="/favicon.ico" type="image/x-icon">
+    <link rel="icon" href="./favicon.ico" type="image/x-icon">
     
-
     <style>
         .landscape-message {
             display: none;
@@ -116,8 +115,16 @@
     </div>
 
     <div id="max-table-cont" class="max-table-cont">
-        <img name='collapse-alt' id="max-collapse" class="max-collapse" src="./collapse-alt-regular-24.png" title="Minimize Table"/>
-        <table id="adjacency-table-max" class="adjacency-table-max"></table>
+        <div class="max-table-wrapper">
+            <div class="collapse-cont">
+                <img name='collapse-alt' id="max-collapse" class="max-collapse" src="./collapse-alt-regular-24.png" title="Minimize Table"/>
+                <h3>Close Table</h3>
+            </div>
+        <table id="adjacency-table-max" class="adjacency-table-max">
+            
+            
+        </table>
+        </div>
     </div>
     
                 
@@ -150,20 +157,28 @@
 
         <div class="button-cont">
             <button class="start-button" onclick="call_and_display()">Run</button>
-            <button id = "switch-button" class="switch-button">Switch to Dijkstra's</button>
+            <button id = "switch-button" class="switch-button">Switch to <br> Dijkstra's</button>
         </div>
     </div>
     <div id="map"></div>
 
     <script>
+         function onMapsApiLoaded() {
+            const script = document.createElement('script');
+            script.src = './a_star.js';
+            script.defer = true; // load main script after api has been injected
+            document.head.appendChild(script);
+        }
+
         const apiKey = "{{API_KEY}}";
-        const script = document.createElement('script');
-        script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&callback=buildMap`;
-        script.async = true;
-        document.head.appendChild(script);
+        const mapScript = document.createElement('script');
+        mapScript.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&callback=onMapsApiLoaded`;
+        mapScript.async = true;
+        document.head.appendChild(mapScript);
     </script>
 
-    <script src="./a_star.js"></script>
+
+    
 
     <script>
         function read_more(){
