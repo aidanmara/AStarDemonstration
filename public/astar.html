@@ -5,7 +5,9 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="styles.css" />
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDcWDbgCB6ZoN-dY4Jxis-m5Ae4du_M8gM"></script>
+    <link rel="icon" href="/favicon.ico" type="image/x-icon">
+    
+
     <style>
         .landscape-message {
             display: none;
@@ -152,6 +154,15 @@
         </div>
     </div>
     <div id="map"></div>
+
+    <script>
+        const apiKey = "{{API_KEY}}";
+        const script = document.createElement('script');
+        script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&callback=buildMap`;
+        script.async = true;
+        document.head.appendChild(script);
+    </script>
+
     <script src="./a_star.js"></script>
 
     <script>
@@ -159,6 +170,8 @@
             window.location.href = 'about.html'
         }
     </script>
+
+    
     
 </body>
 </html>

@@ -1,13 +1,18 @@
+//All Visualizer Functionality is Included in this file
+
+
+//implement priority queue for neighbor selection
 class PriorityQueue {
     constructor() {
       this.heap = [];
     }
   
-    // Method to swap elements in the heap
+    //swap heap
     swap(i, j) {
       [this.heap[i], this.heap[j]] = [this.heap[j], this.heap[i]];
     }
 
+    //retrieve end of pqueue
     extractMin() {
         const min = this.heap[0];
         const end = this.heap.pop();
@@ -18,7 +23,7 @@ class PriorityQueue {
         return min;
     }
   
-    // Method to bubble up an element to its correct position
+    //bubble up queue
     bubbleUp() {
         let index = this.heap.length - 1;
         while (index > 0) {
@@ -28,7 +33,8 @@ class PriorityQueue {
           index = parentIndex;
         }
       }
-      
+
+      //sink down queue
       sinkDown(index) {
           const length = this.heap.length;
           const element = this.heap[index];
@@ -61,13 +67,13 @@ class PriorityQueue {
           }
           this.heap[index] = element;
       }
-    // Method to insert an element with a given priority
+    //insert an element into prio queue
     enqueue(element, priority) {
       this.heap.push({ element, priority });
       this.bubbleUp();
     }
   
-    // Method to remove and return the element with the highest priority
+    //retrieve the element with the best priority
     dequeue() {
       if (this.heap.length === 0) return null;
       if (this.heap.length === 1) return this.heap.pop().element;
@@ -78,18 +84,19 @@ class PriorityQueue {
       return root;
     }
   
-    // Method to check if the priority queue is empty
+    //check if prio_queue is empty
     isEmpty() {
       return this.heap.length === 0;
     }
   
-    // Method to get the size of the priority queue
+    //returns size
     size() {
       return this.heap.length;
     }
   }
 
-
+//All location data used, one with coordinates and one with neighbors
+// In Retrospect working with a singular dictionary would have been much more efficient
 var locData = {
     locations: [
         { name: 'New York', lat: 40.712776, lng: -74.005974 },
@@ -389,7 +396,7 @@ var locData = {
 
 };
 
-
+// Heuristic Function in this case is distance across globe at 2 points
 function haversine(lat1, lon1, lat2, lon2) {
     const toRadian = Math.PI / 180; // Convert degrees to radians
     const radius = 3958.8; // Radius of Earth in miles
@@ -412,75 +419,33 @@ function haversine(lat1, lon1, lat2, lon2) {
 
 function calculate_estimated_distances(current, endname){
     let heuristicScore = Infinity;
-    //calculate the heuristic function for each name 
+    // calculate the heuristic function for each name 
 
     heuristicScore = haversine(current.lat, current.lng, endname.lat, endname.lng);
     return heuristicScore;
 }
 
-
-async function drawlines(currentCity, speed){
-    
-    var currnameAdj = locData.adjacencies[currentCity.name];    
-    var currPaths = [];
-
-    await Promise.all(currnameAdj.map(async (city, index) => {
-        await new Promise(resolve => setTimeout(resolve, index * (speed * 1000)));
-
-        var adjacentnameLocation = locData.locations.find(loc => loc.name === city.name);
-        
-        var pathCoordinates = [
-            { lat: currentCity.lat, lng: currentCity.lng },
-            { lat: adjacentnameLocation.lat, lng: adjacentnameLocation.lng }
-        ];
-
-        var path = new google.maps.Polyline({
-            path: pathCoordinates,
-            geodesic: true,
-            strokeColor: "#FF0000",
-            strokeOpacity: 1.0,
-            strokeWeight: 2,
-        });
-
-        path.setMap(map);
-        currPaths.push(path);
-
-        if (index === currnameAdj.length - 1) {
-            return currPaths;
-        }
-    }));
-
-    return currPaths;
-}
-
-async function build_iteration(startname, speed) {
-    var currentpaths = await drawlines(startname, speed);
-
-    setTimeout(() => {
-    
-    var bestPath = currentpaths[0];
-
-    setTimeout(() => {
-        bestPath.setMap(map);
-    }, speed*1000); // Set your desired timeout in milliseconds
-
-    }, speed*1000);
-
-}
-
+//Google Maps marker list, Need to delete these later the best way I could think of was to use a global variable
 var markerList = new Array();
 var markerMap = new Map();
 
+// At the start of every iteration, Reset the markers on the map by deleting the previous ones and remaking the map.
+// This could probably be improved by only storing the starting node and finishing node, but I'm not certain how to handle removing the default...
+// marker on the new start and destination nodes.
 function set_markers(){
+    // Reset Map
     markerList.forEach(mark =>{
         mark.setMap(null);
     });
 
+    // Create a new mappping for each marker
     markerMap = new Map();
     markerMap.clear();
 
+    // for every location create a marker
     locData.locations.forEach(function(location) {
         if (location.name == currentStart){
+            // Handle the case that it is the starting node and give it a green flag.
             var marker = new google.maps.Marker({
                 position: { lat: location.lat, lng: location.lng },
                 map: map,
@@ -491,6 +456,7 @@ function set_markers(){
             });
         }
         else if(location.name == currentDestination){
+            // Handle the case that it is the destination node and give it a red flag.
             var marker = new google.maps.Marker({
                 position: { lat: location.lat, lng: location.lng },
                 map: map,
@@ -501,6 +467,7 @@ function set_markers(){
             });
         }
         else{
+            // Give the location a default marker
             var marker = new google.maps.Marker({
                 position: { lat: location.lat, lng: location.lng },
                 map: map,
@@ -512,7 +479,7 @@ function set_markers(){
             });
         }
             
-
+        //apply a stylized info window at each marker when clicked, that gives you the option to select them as a starting or ending node
         var infowindow = new google.maps.InfoWindow({
             content: `
                 <div class="info-window">
@@ -522,53 +489,64 @@ function set_markers(){
                 </div>
             `
             ,
-            pixelOffset: new google.maps.Size(0, -15) // Adjust the vertical offset here
+            pixelOffset: new google.maps.Size(0, -15)
         });
-    
+        
+        // Apply listener to show the info window
         marker.addListener("click", function() {
             infowindow.open(map, marker);
 
         });
 
+        // Add an animation to the marker when hovering over it
         marker.addListener('mouseover', function() {
             glow_hover_mouse(location.name, marker);
         });
 
+        // Add this marker to the global list and map 
         markerMap.set(location.name, marker);
         markerList.push(marker)
     });    
 }
 
+// This function handles building the map, from the styling I created and adjusting the window to fit in the markers, 
+// There may be a way to not hard code it, but I couldn't find it in the documentation for maps
 function build_map(){
+
+    //fetch the map styling from files
     fetch('map_styling.json')
     .then(response => response.json())
     .then(data => {
-        
+        //google maps map attributes
         var mapOptions = {
             center: { lat: 37.7749, lng: -95.4194 },
             zoom: 5,
             styles: data,
             disableDefaultUI: true,
         }
-
+        
+        //Create the map for the map global variable
         map = new google.maps.Map(document.getElementById('map'), mapOptions);
 
+        //Place markers
         set_markers();
 
+        //For each city in our locations data,
         Object.keys(locData.adjacencies).forEach(function(city) {
             var cityLocation = locData.locations.find(loc => loc.name === city);
         
             if (!cityLocation) {
                 console.error("City location not found:", city);
-                return; // Skip processing this city
+                return; // Skip processing this city if it doesnt exist
             }
-        
+            
+            //Temporarily store the adjacent cities of current and build a default pathe between them to represent the graph 
             var adjacentCities = locData.adjacencies[city];
             adjacentCities.forEach(function(adjacentCity) {
                 var adjacentCityLocation = locData.locations.find(loc => loc.name === adjacentCity.name);
                 if (!adjacentCityLocation) {
                     console.error("Adjacent city location not found:", adjacentCity);
-                    return; // Skip processing this adjacent city
+                    return; // Skip processing this adjacent city if it cannot be found
                 }
         
                 var pathCoordinates = [
@@ -584,7 +562,7 @@ function build_map(){
                     strokeOpacity: 1.0,
                     strokeWeight: 2,
                 });
-        
+                // Add this path to the map
                 path.setMap(map);
             });
     
@@ -593,24 +571,30 @@ function build_map(){
 });
 }
 
+//These Global Variables handle the visualization aspect of the program
 var eventHandle = new Array();
 var activePath = new Array();
 var activeBest = new Array();
 var bestpath = new Map();
 
+//Set a default start and destination city
 var currentStart = "Los Angeles"
 var currentDestination = "New York"
 
+// This variable is just used for dispalying text.
 var currentAlgo = "A*";
 
-var timeoutID = ""
-
+//Run The visualiztion
 async function run_reconstruct() {
+    //Clear the previous vizualized path
     await clear_lines(); 
+    //Set a process Id so we avoid running two vizualtion over each other
     await set_pid();
+    //Show the Vizualization steps
     await show_events(); 
 }
 
+//Simply introduce a new process id
 function set_pid() {
     return new Promise(resolve => {
         pid++;
@@ -618,12 +602,14 @@ function set_pid() {
     });
 }
 
+// Clear the current path by setting them all to null
 function clear_path(path){
     path.forEach(line => {
         line.setMap(null);
     });
 }
 
+// Clear the current vizualized path and/or best path
 function clear_lines() {
     return new Promise(resolve => {
         clear_path(activePath);
@@ -632,6 +618,7 @@ function clear_lines() {
     });
 }
 
+// This is the same as the previous one except it should reset the entire variable as well to make way for a new algo or start/dest
 function clear_map() {
     return new Promise(resolve => {
 
@@ -647,11 +634,13 @@ function clear_map() {
     });
 }
     
-
+// Call this when we update the algorithm, to update ui and global for calling the function
 function set_current_and_end(startname, endname){
+    //Update Globals
     currentStart = startname
     currentDestination = endname
 
+    //Update The UI/UX
     startText = document.getElementById("searchInputFrom");
     destText = document.getElementById("searchInputTo");
 
@@ -661,35 +650,52 @@ function set_current_and_end(startname, endname){
     let title = document.getElementById("title");
     title.innerHTML = `<h1>${currentAlgo} Pathfinding from ${startname} to ${endname}</h1>`;
 
+    //reset the markers with new start and dest nodes
     set_markers();
 }
 
+// Main A* algorithm
 function a_star(startname, endname){
+        // Find locations in the data list
         startname = locData.locations.find(loc => loc.name === startname);        
         endname = locData.locations.find(loc => loc.name === endname);
 
+        // create new essential data structs to run the algorithm
+        // Use Priority Queue here to effeciently get the best neighbor to visit
         let openQueue = new PriorityQueue();
+        // visitedset allows us to skip previous nodes
         let visitedSet = new Set();
+        // generate a map to store the path taken
         let cameFrom = new Map();
-
+        // Store gscore Map for comparison
         let gScore = new Map();
-        const startTime = performance.now();
+
+        //Initialize entire table to inf, except starting point
         locData.locations.forEach(node => gScore.set(node.name, Infinity));
         gScore.set(startname.name, 0);
 
+        // Store gscore Map for comparison
         let fScore = new Map();
         locData.locations.forEach(node => fScore.set(node.name, Infinity));
+        //Initialize entire table to inf, except starting point with estimated distance using haversine
         fScore.set(startname.name, calculate_estimated_distances(startname, endname));
 
+        //Add staring node to queue and begin algo
         openQueue.enqueue(startname.name, fScore.get(startname.name));
 
         while (!openQueue.isEmpty()) {
+                // Container for the visual data for each iteration of the algo
                 let iterationData = new Object();
                 let prediscoverPath = [];
+
+                // Pop the element with the best score, and visit
                 let current = openQueue.extractMin().element;
                 visitedSet.add(current);
+
+                // For graph UI later
                 iterationData['visitedCity'] = current;
 
+                // create a new polyline to each visited node
                 if (current != startname.name){    
                     
                     let currentCoords = locData.locations.find(loc => loc.name === current);
@@ -712,8 +718,9 @@ function a_star(startname, endname){
                     prediscoverPath.push(explore);
                 }
 
-
+            // If we reach the destination, end the algorithm and clean up
             if (current === endname.name) {
+                // Create the last polyline
                 let currentCoords = locData.locations.find(loc => loc.name === current);
                 let lastCoords = locData.locations.find(loc => loc.name === endname.name);
 
@@ -730,18 +737,21 @@ function a_star(startname, endname){
                     strokeWeight: 3,
                     zIndex: 50
                 });
-        
+                
+                //Add iteration data to 
                 prediscoverPath.push(explore);
                 iterationData['edges'] = prediscoverPath;
                 eventHandle.push(iterationData);
 
-
+                // Save the best path as a polyline and as a list for visualization later
                 bestpath = reconstruct_path(cameFrom, current);
                 display_best_path(bestpath, gScore.get(current));
 
+                // Get the speed of each algo as a quiet function
                 let astarTime = quiet_astar(startname.name, endname.name);
                 let dijkstraTime = quiet_dijkstra(startname.name, endname.name);
 
+                //Update performance and effeciency texts
                 let performanceText = document.getElementById("performance");
                 performanceText.innerHTML = `<h1>Time to converge: ${astarTime.toFixed(8)}ms</h1>`;
                 
@@ -750,35 +760,38 @@ function a_star(startname, endname){
                 let eff = (dijkstraTime - astarTime)
                 efficiencyText.innerHTML = `<h1> ${eff.toFixed(3)}ms faster than Dijkstra's </h1>`;
 
-
-
+                // Return the best path
                 return reconstruct_path(cameFrom, current);
             }
 
+            // Get adjacent Nodes
             var neighbors = locData.adjacencies[current];
             iterationData['visitedCities'] = new Array;
 
             neighbors.forEach(neighbor => {
+                //Get new gscore
                 let gScoreTemp = gScore.get(current) + neighbor.distance;
-    
+                
+                //If it is better than its previous gscore visit
                 if (gScoreTemp < gScore.get(neighbor.name)) {
+                    // Add to Maps
                     cameFrom.set(neighbor.name, current);
                     gScore.set(neighbor.name, gScoreTemp);
 
+                    // Get new fscore and add to table visualization map
                     let neighborCoords = locData.locations.find(loc => loc.name === neighbor.name);
                     fScore.set(neighbor.name, gScoreTemp + calculate_estimated_distances(neighborCoords, endname));
                     iterationData['visitedCities'].push([neighbor.name, gScore.get(neighbor.name)]);
-    
+                    
+                    // If its not visited, visit
                     if (!visitedSet.has(neighbor.name)) {
                         openQueue.enqueue(neighbor.name, fScore.get(neighbor.name));
                     }
 
-
-                    
                 }
-                
-               
+            
             });
+            //Push Visualiztion data at each iteration so it can display in steps
             iterationData['edges'] = prediscoverPath;
             eventHandle.push(iterationData);
         }
@@ -788,31 +801,36 @@ function a_star(startname, endname){
 }
 
 
-
+// Dijkstra
 function dijkstra(startname, endname) {
-
+    //Set start and dest locations
     startname = locData.locations.find(loc => loc.name === startname);        
     endname = locData.locations.find(loc => loc.name === endname);
 
+    //Create Data Structs
     let openQueue = new PriorityQueue();
     let visitedSet = new Set();
     let cameFrom = new Map();
-
-    const startTime = performance.now();
-
     let gScore = new Map();
+
+    //Set Default Data
     locData.locations.forEach(node => gScore.set(node.name, Infinity));
     gScore.set(startname.name, 0);
 
+    //Visit First Node
     openQueue.enqueue(startname.name, gScore.get(startname.name));
 
     while (!openQueue.isEmpty()) {
+        // Visualization Iteration data
         let iterationData = new Object();
         let prediscoverPath = [];
+        
+        // Pop Best location and visit
         let current = openQueue.extractMin().element;
         visitedSet.add(current);
         iterationData['visitedCity'] = current;
 
+        // Saving polyline paths
         if (current != startname.name){    
             let currentCoords = locData.locations.find(loc => loc.name === current);
             let lastCoords = locData.locations.find(loc => loc.name === cameFrom.get(current));
@@ -834,7 +852,10 @@ function dijkstra(startname, endname) {
             prediscoverPath.push(explore);
         }
 
+        // We've reached the end rebuild and update UI
         if (current === endname.name) {
+
+            // Save the Polyline
             let currentCoords = locData.locations.find(loc => loc.name === current);
             let lastCoords = locData.locations.find(loc => loc.name === endname.name);
 
@@ -852,44 +873,52 @@ function dijkstra(startname, endname) {
                 zIndex: 50
             });
     
+            //Push Iteration Data for last iteration
             prediscoverPath.push(explore);
             iterationData['edges'] = prediscoverPath;
             eventHandle.push(iterationData);
 
+            // Build best path for visualization
             bestpath = reconstruct_path(cameFrom, current);
-
             display_best_path(bestpath,gScore.get(current));
 
-            let endTime = performance.now();
-            let dijkstraTime = (endTime - startTime);
+            //get Performance
+            let dijkstraTime = quiet_dijkstra(startname.name,endname.name);
             let astarTime = quiet_astar(startname.name,endname.name);
 
+            // Update UI with performance and effeciency
             let performanceText = document.getElementById("performance");
-            performanceText.innerHTML = `<h1>Time to converge: ${(endTime - startTime).toFixed(8)}ms</h1>`;
+            performanceText.innerHTML = `<h1>Time to converge: ${(dijkstraTime - astarTime).toFixed(8)}ms</h1>`;
 
             let efficiencyText = document.getElementById("efficiency");
             efficiencyText.style.color = "#944941"; 
             let eff = (dijkstraTime - astarTime);
             efficiencyText.innerHTML = `<h1> ${eff.toFixed(3)}ms slower than A* </h1>`;
 
+            // Exit with return best path
             return reconstruct_path(cameFrom, current);
         }
 
+        // Get adjacent nodes
         var neighbors = locData.adjacencies[current];
+        // For visualization on table/matrix
         iterationData['visitedCities'] = new Array;
         
+        //Visit each neighbor
         neighbors.forEach(neighbor => {
+            //Get new gscore from current node
             let gScoreTemp = gScore.get(current) + neighbor.distance;
 
+            //Update Gscore if it is better and add to queue
             if (gScoreTemp < gScore.get(neighbor.name)) {
                 cameFrom.set(neighbor.name, current);
                 gScore.set(neighbor.name, gScoreTemp);
                 iterationData['visitedCities'].push([neighbor.name, gScore.get(neighbor.name)]);
-
                 openQueue.enqueue(neighbor.name, gScore.get(neighbor.name));
             }
         });
 
+        // Add this iterations visualization data
         iterationData['edges'] = prediscoverPath;
         eventHandle.push(iterationData);
     }
@@ -897,7 +926,9 @@ function dijkstra(startname, endname) {
     return null;
 }
 
+// Update the bestpath UI that represents the best path generated by the algo
 function display_best_path(bestPath,gScore){
+    //Get best path element and apply the new text
     let bestPathDiv = document.getElementById("best-path-li");
 
     bestPathDiv.innerHTML = "";
@@ -908,11 +939,13 @@ function display_best_path(bestPath,gScore){
         bestPathDiv.appendChild(listItem);
     });
 
+    //Create the total distance score element and update the text
     let totalScoreItem = document.createElement("h3");
     totalScoreItem.textContent = `Total distance: ${gScore.toFixed(2)}mi`;
     bestPathDiv.appendChild(totalScoreItem);
 }
 
+//For the speed analysis, exactly the same as the other astar except for not saving visualiztion data, look at other to understancd
 function quiet_astar(startname, endname){
     startname = locData.locations.find(loc => loc.name === startname);        
     endname = locData.locations.find(loc => loc.name === endname);
@@ -962,6 +995,7 @@ function quiet_astar(startname, endname){
     return null;
 }
 
+//For the speed analysis, exactly the same as the other dijkstra except for not saving visualiztion data, look at other to understancd
 function quiet_dijkstra(startname, endname) {
     
     startname = locData.locations.find(loc => loc.name === startname);        
@@ -1056,7 +1090,7 @@ function quiet_dijkstra(startname, endname) {
     return null;
 }
 
-
+// Rebuild the best path by going backwards in the came from path
 function reconstruct_path(cameFrom, current) {
     let totalPath = [current];
     while (cameFrom.has(current)) {
@@ -1066,7 +1100,7 @@ function reconstruct_path(cameFrom, current) {
     return totalPath;
 }
 
-
+// Checks the heuristics for each path to ensure the heuristic is smaller or equal than the actual to make sure algo works as its supposed to
 function check_heuristics(){ 
     let nonAdmis = [];
     locData.locations.forEach(location => {
@@ -1082,6 +1116,7 @@ function check_heuristics(){
     console.log(nonAdmis);
 }
 
+//Checks the symmetry of the adjacencies on the map to efficiently make corrections, should only be ran manually by dev/debugger
 function check_symmetry(){ 
     let nonAdmis = [];
     locData.locations.forEach(location => {
@@ -1097,22 +1132,32 @@ function check_symmetry(){
 
     console.log(nonAdmis);
 }
+
 var pid = 0; // Process ID tracker
 
 function show_events() {
     return new Promise(resolve => {
         const check = ++pid; // Increment and use a new unique ID for each execution
         let index = 0;
+
+        // Reset adj matrix when new visualization is requested
         reset_adj_mat();
+
+        // Get Adj Matrix UI element for updates
         let table = document.getElementById("adjacency-table");
         let bigTable = document.getElementById("adjacency-table-max");
 
+        // Next Iteration
         function process_next_event() {
+            // Checks if in range and same vizualization request
             if (index < eventHandle.length && pid === check) {
+                // Get User defined speed value
                 let speed = document.getElementById("speed-range").value;
-
+                
+                //Remove Highlight from table element no matter what
                 unhighlight_city(); 
 
+                // Get Next iteration data
                 let event = eventHandle[index];
 
                 // Display the edges on the map
@@ -1133,37 +1178,45 @@ function show_events() {
                     updateAdjacencyMatrix(event['visitedCity'], event['visitedCities']);
                 }
 
+                // Update the expanded table html to be the same as the smaller one
                 bigTable.innerHTML = table.innerHTML;
 
+                // Go to next iteration after a timeout of the user-defined speed
                 index++;
                 setTimeout(process_next_event, speed * 1000);
             } else {
                 if (pid === check) {
+                    //If same pid display best path
                     setTimeout(display_path, 1); 
                     resolve(); 
                 }
                 resolve(); 
             }
         }
-
+        
+        //Call first iteration
         process_next_event();
     });
 }
 
+// Get the row and column for the current city in matrixz and highlight
 function highlight_city(city, neighbors) {
+    // Grab table element
     let table = document.getElementById("adjacency-table");
     
+    // Get teh column of the current city by finding it in the header row, could be optimized with a Map I think
     let headerCell = table.querySelector(`th[data-city="${city}"]`);
     if (headerCell) {
         headerCell.classList.add("highlight");
     }
+    // Simply grab the current row
     let row = table.querySelector(`tr[data-city="${city}"]`);
 
+    // add highlight to row
     if (row) {
         row.classList.add("highlight");
         Array.from(row.children).forEach(cell => cell.classList.add("highlight"));
     }
-
     let columnIndex = Array.from(table.querySelectorAll("tr")[0].children)
                            .findIndex(cell => cell.textContent === city);
     if (columnIndex !== -1) {
@@ -1172,17 +1225,20 @@ function highlight_city(city, neighbors) {
     }
 
 
+    // If there are neigbors visited, highlight those in different colors
     if (neighbors && neighbors.length != 0){
         neighbors.forEach(neighbor => {
+            // Get neohbor row
             let neighborRow = table.querySelector(`tr[data-city="${neighbor[0]}"]`);
             if (neighborRow) {
-                // Highlight the cell in the row of the neighbor
+                // Highlight the cell in the row of the neighbor in relation to the current city
                 let neighborCell = neighborRow.children[columnIndex];
                 if (neighborCell) {
                     neighborCell.classList.add("highlight-update");
                 }
             }
 
+            // Get the column as well and highlight the cell of the neighbor in relation to the current city
             let neighborColumnIndex = Array.from(table.querySelectorAll("tr:first-child th"))
                                         .findIndex(cell => cell.getAttribute("data-city") === neighbor[0]);
             if (neighborColumnIndex !== -1) {
@@ -1193,6 +1249,7 @@ function highlight_city(city, neighbors) {
     }
 }
 
+// Unlhighlight all elements that arer currently highlighted
 function unhighlight_city() {
     let highlightedElements = document.querySelectorAll('.highlight, .highlight-update');
 
@@ -1202,7 +1259,9 @@ function unhighlight_city() {
     });
 }
 
+// Change the values in the adjacency Matrix UI
 function updateAdjacencyMatrix(currentCity, visitedCities) {
+    /// Get table element
     let table = document.getElementById("adjacency-table");
     
     // Update the row for the current city
@@ -1224,15 +1283,20 @@ function updateAdjacencyMatrix(currentCity, visitedCities) {
     });
 }
 
+// Display best path
 function display_path(){
+
 
     function draw_best_path(){
         let index = 0;
 
+        // Loop through each city of the best path and build out the entire path
         while(index < bestpath.length-1){
+            // Current city, compared to last coordinates
             let currentCoords = locData.locations.find(loc => loc.name === bestpath[index]);
             let lastCoords = locData.locations.find(loc => loc.name === bestpath[index+1]);
-        
+            
+            //Build polyline with these coordinates with best path color
             let pathCoords = [
                 {lat: currentCoords.lat, lng: currentCoords.lng},
                 {lat: lastCoords.lat, lng: lastCoords.lng},
@@ -1246,7 +1310,8 @@ function display_path(){
                 strokeWeight: 4,
                 zIndex: 52
             });
-        
+            
+            //apply to google map and global value
             explore.setMap(map);
             activeBest.push(explore);
             index++; 
@@ -1254,18 +1319,23 @@ function display_path(){
            
     }
 
+    // Just Aesthetically timeout
     setTimeout(draw_best_path, 100);
 }
 
+// This function creates the autofill lists of starting and destination locations
 function set_start_dest_lists(){
+    // Get elements and current values
     const startContent = document.getElementById('start-cont');
     const destContent = document.getElementById('dest-cont');
     const start = currentStart;
     const destination = currentDestination;
 
+    //Reset HTML
     startContent.innerHTML = '';
     destContent.innerHTML = '';
 
+    //Create the menu list for each city of start element
     locData.locations.forEach(city => {
         const startAnchor = document.createElement('a');
         startAnchor.textContent = city.name;
@@ -1274,6 +1344,7 @@ function set_start_dest_lists(){
         startContent.appendChild(startAnchor);
     });
 
+    //Create the menu list for each city of destination element
     locData.locations.forEach(city => {
         const destAnchor = document.createElement('a');
         destAnchor.textContent = city.name;
@@ -1283,27 +1354,37 @@ function set_start_dest_lists(){
     });
 }
 
-
+//handle the selection click of menu option
 function handle_astar_click(id,start,dest){
+    // hide the dropdown menu
     hide_dropdown(id)
+    // Update the start and dest 
     set_current_and_end(start, dest);
+    // Reset the map
     clear_map();
+    // reset the list element
     set_start_dest_lists();
 }
 
+// If marker is clicked handle the update
 function handle_marker_click(start,dest){
+    // Update the start and dest 
     set_current_and_end(start, dest);
+     // Reset the map
     clear_map();
+    // reset the list element
     set_start_dest_lists();
 }
 
-
+// Filter the values in the input atbe to match the text inputted by the user
 function filterFunction(form, container) {
-    var input, filter, div, a, i;
-    input = document.getElementById(form);
-    filter = input.value.toUpperCase();
-    div = document.getElementById(container);
-    a = div.getElementsByTagName("a");
+    // Retrieve the elements from the imput UI
+    let input = document.getElementById(form);
+    let filter = input.value.toUpperCase();
+    let div = document.getElementById(container);
+    let a = div.getElementsByTagName("a");
+
+    // Match the remaining valid texts and display
     for (i = 0; i < a.length; i++) {
         txtValue = a[i].textContent || a[i].innerText;
         if (txtValue.toUpperCase().indexOf(filter) > -1) {
@@ -1314,6 +1395,7 @@ function filterFunction(form, container) {
     }
 }
 
+//Hides the dropdown element
 function show_dropdown(dropdownId) {
     var dropdown = document.getElementById(dropdownId);
     if (dropdown) {
@@ -1321,6 +1403,7 @@ function show_dropdown(dropdownId) {
     }
 }
 
+//Alternate Dropdown hiding
 function hide_dropdown(dropdownId, inputField) {
     var dropdown = document.getElementById(dropdownId);
     if (dropdown) {
@@ -1335,6 +1418,7 @@ function hide_dropdown(dropdownId, inputField) {
     }
 }
 
+// Activate the animation of the marker on the google maps when hovered the text element in the dropdown list
 function glow_hover(city, div) {
     let citycoords = locData.locations.find(loc => loc.name === city);
     let marker = markerMap.get(city);
@@ -1351,6 +1435,7 @@ function glow_hover(city, div) {
     }
 }
 
+// Activate the animation of the marker on the google maps when hovered on the map with the mouse
 function glow_hover_mouse(city, marker) {
     marker.setAnimation(google.maps.Animation.BOUNCE);
 
@@ -1359,6 +1444,7 @@ function glow_hover_mouse(city, marker) {
     });
 }
 
+// Slider element value and ui update
 var slider = document.getElementById("speed-range");
 var output = document.getElementById("speed-text");
 output.innerHTML = `Speed: ${slider.value} s`;
@@ -1367,24 +1453,36 @@ slider.oninput = function() {
   output.innerHTML = `Speed: ${this.value} s`;
 }
 
+
+// Switch to the other algorithm using this element
 var switchButton = document.getElementById("switch-button");
 
+// Add a function to update the current algorithm
 switchButton.addEventListener("click", function() {
+    // If A* set to dijsktras
     if (currentAlgo == "A*"){
         currentAlgo = "Dijkstra's";
+        //update UI
         switchButton.innerHTML = "Switch to A*";
+        
+        // Reset the map, new start and end, and adj matrix ui
         clear_map();
         set_current_and_end(currentStart, currentDestination);
         reset_adj_mat()
     }
     else if(currentAlgo == "Dijkstra's"){
+        //Set to A*
         currentAlgo = "A*";
+        //Update UI
         switchButton.innerHTML = "Switch to Dijkstra's";
+        // Reset the map, new start and end, and adj matrix ui
         clear_map();
         set_current_and_end(currentStart, currentDestination);
+        reset_adj_mat();
     }
 })
 
+// Reset the UI for the adjacency matrix
 function reset_adj_mat() {
     let table = document.getElementById("adjacency-table");
     let locations = locData.locations;
@@ -1409,6 +1507,7 @@ function reset_adj_mat() {
     }
 }
 
+// Create the Matrix Element by getting the locations from the table and buidling a tabgle of that size
 function create_adj_mat_a() {
     let table = document.getElementById("adjacency-table");
     let locations = locData.locations;
@@ -1460,9 +1559,9 @@ function create_adj_mat_a() {
     bigTable.innerHTML = table.innerHTML;
 }
 
-// Run the function to create the matrix
-create_adj_mat_a();
 
+
+// Expand Table element will toggle the bigger table
 document.getElementById("expand-table").addEventListener("click", function() {
     var table = document.getElementById("adjacency-table-cont");
     table.classList.toggle("expanded");
@@ -1471,6 +1570,7 @@ document.getElementById("expand-table").addEventListener("click", function() {
     tableMax.classList.toggle("expanded");
 });
 
+// Collapse Table element will toggle the smaller hidden table
 let collapseButton = document.getElementById("max-collapse");
 
     collapseButton.addEventListener("click", function() {
@@ -1481,17 +1581,23 @@ let collapseButton = document.getElementById("max-collapse");
 });
 
 
+// Handle the start button
 function call_and_display(){
     
     if (currentAlgo == "A*"){
+        // Reset the Map
         clear_map();
+        // Run the Algo
         a_star(currentStart, currentDestination);
     }
     else if (currentAlgo == "Dijkstra's"){
+        // Reset the Map
         clear_map();
+        // Run the Algo
         dijkstra(currentStart, currentDestination);
     }
 
+    // Run the Vizualisation process
     run_reconstruct();
 }
 
@@ -1512,5 +1618,11 @@ function call_and_display(){
 //a_star('LosAngeles', 'NewYork');
 //dijkstra('LosAngeles', 'NewYork');
 //quiet_dijkstra('LosAngeles', 'NewYork');
+
+
+//Create the map on load and the dropdown table elements
 build_map();
 set_start_dest_lists();
+
+// Run the function to create the matrix on load
+create_adj_mat_a();
