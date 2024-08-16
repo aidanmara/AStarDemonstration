@@ -514,14 +514,14 @@ function set_markers(){
 // This function handles building the map, from the styling I created and adjusting the window to fit in the markers, 
 // There may be a way to not hard code it, but I couldn't find it in the documentation for maps
 function build_map(){
-    zoom = 4
+    zoom = 5
     //fetch the map styling from files
     fetch('map_styling.json')
     .then(response => response.json())
     .then(data => {
         //google maps map attributes
         var mapOptions = {
-            center: { lat: 37.7749, lng: -95.4194 },
+            center: { lat: 37.7749, lng: -99.4194 },
             zoom: zoom,
             styles: data,
             disableDefaultUI: true,
