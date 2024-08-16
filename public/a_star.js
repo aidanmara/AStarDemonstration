@@ -635,6 +635,9 @@ function clear_lines() {
 // This is the same as the previous one except it should reset the entire variable as well to make way for a new algo or start/dest
 function clear_map() {
     return new Promise(resolve => {
+        // Reset adj matrix when new visualization is requested
+        reset_adj_mat();
+        unhighlight_city();
 
         clear_path(activePath);
         activePath = [];
@@ -1153,9 +1156,6 @@ function show_events() {
     return new Promise(resolve => {
         const check = ++pid; // Increment and use a new unique ID for each execution
         let index = 0;
-
-        // Reset adj matrix when new visualization is requested
-        reset_adj_mat();
 
         // Get Adj Matrix UI element for updates
         let table = document.getElementById("adjacency-table");
