@@ -507,12 +507,14 @@ function set_markers(){
         markerMap.set(location.name, marker);
         markerList.push(marker)
     });    
+
+
 }
 
 // This function handles building the map, from the styling I created and adjusting the window to fit in the markers, 
 // There may be a way to not hard code it, but I couldn't find it in the documentation for maps
 function build_map(){
-
+    zoom = 4
     //fetch the map styling from files
     fetch('map_styling.json')
     .then(response => response.json())
@@ -520,11 +522,23 @@ function build_map(){
         //google maps map attributes
         var mapOptions = {
             center: { lat: 37.7749, lng: -95.4194 },
-            zoom: 5,
+            zoom: zoom,
             styles: data,
             disableDefaultUI: true,
-        }
-        
+            //Prevent user from zooming or panning out of our specific bound
+            minZoom: zoom - 2,
+            maxZoom: zoom + 2,
+            restriction: {
+                        latLngBounds: {
+                            north: 55.0,
+                            south: 15.0,   
+                            east: -50.0,  
+                            west: -150.0
+                    },
+                },
+            strictBounds: true 
+            }
+                
         //Create the map for the map global variable
         map = new google.maps.Map(document.getElementById('map'), mapOptions);
 

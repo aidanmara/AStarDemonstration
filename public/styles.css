@@ -307,6 +307,13 @@
         height: fit-content;
     }
     
+    .performance h1{
+        margin: 0%;
+        margin-top: 5%;
+    }
+    .performance{
+        margin: 0%;
+    }
 
 
 
@@ -534,9 +541,13 @@
 
     .efficiency{
         font-size: x-small;
-        margin-top: -30px;
+        margin-top: 10px;
         font-size: .5vw;
         width: 100%;
+    }
+
+    .efficiency h1{
+        margin-top: 0%;
     }
 
     .slide-container{
