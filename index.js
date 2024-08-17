@@ -18,7 +18,7 @@ const apiLimiter = rateLimit({
 
 app.use('/', apiLimiter);
 
-// Serve static files from [public
+// Serve static files from public
 app.use(express.static(path.join(__dirname, 'public')));
 
 //Load Default Page AKA Visualizer

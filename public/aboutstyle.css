@@ -168,6 +168,7 @@ h2{
     width: 90%;
     text-wrap: nowrap;
     gap: 1%;
+    overflow: hidden;
 }
 
 .link h3{
